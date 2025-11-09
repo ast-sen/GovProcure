@@ -7,6 +7,8 @@ import { ReportsMenu } from './pages/reports/Reports';
 import BACMenu from './pages/bac/BacMenu';
 import PurchaseOrder from './pages/reports/PurchaseOrder';
 import InspectionAcceptanceReport from './pages/reports/AcceptanceForm';
+import ApprovalsScreen from './pages/reports/Approvals';
+import PPMPManagementScreen from './pages/bac/BacPPMP';
 
 function App() {
   const [activeNav, setActiveNav] = useState('dashboard');
@@ -17,6 +19,12 @@ function App() {
         return <Dashboard onNavigate={setActiveNav}/>;
       case 'bac-menu':
         return <BACMenu onNavigate={setActiveNav} />;
+      case 'bac-ppmp':
+        return <PPMPManagementScreen onNavigate={setActiveNav} />;
+      // case 'bac-menu':
+      //   return <BACMenu onNavigate={setActiveNav} />;
+      // case 'bac-menu':
+      //   return <BACMenu onNavigate={setActiveNav} />;
       case 'project-procurement':
         return <Procurement onNavigate={setActiveNav} />;
       case 'purchase-request':
@@ -25,6 +33,8 @@ function App() {
         return <PurchaseOrder onNavigate={setActiveNav} />;
       case 'reports-inspection-acceptance':
         return <InspectionAcceptanceReport onNavigate={setActiveNav} />;
+      case 'reports-approvals':
+        return<ApprovalsScreen onNavigate={setActiveNav} />
       case 'reports':
         return <ReportsMenu onNavigate={setActiveNav} />;
       case 'settings':

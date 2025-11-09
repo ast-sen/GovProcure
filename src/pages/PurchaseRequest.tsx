@@ -256,11 +256,11 @@ export const PurchaseRequest = ({ onNavigate }: PurchaseRequestProps) => {
           <div className="flex items-center gap-4">
             {onNavigate && (
               <button
-                onClick={() => onNavigate('bac-menu')}
+                onClick={() => onNavigate('dashboard')}
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft size={20} />
-                <span>Back to BAC Menu</span>
+                <span>Back </span>
               </button>
             )}
             <div>

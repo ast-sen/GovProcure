@@ -139,8 +139,8 @@ const BACMenu = ({ onNavigate }: BACMenuProps) => {
                 <div className="flex items-start gap-3">
                   <DollarSign size={20} className="text-green-500 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-800">Payroll Processed</p>
-                    <p className="text-sm text-gray-600">October payroll has been completed</p>
+                    <p className="font-semibold text-gray-800">Purchase Request Processed</p>
+                    <p className="text-sm text-gray-600">MBO PR has been completed</p>
                     <p className="text-xs text-gray-500 mt-1">1 day ago</p>
                   </div>
                 </div>
