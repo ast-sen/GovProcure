@@ -18,7 +18,7 @@ const BACMenu = ({ onNavigate }: BACMenuProps) => {
       title: 'Purchase Request',
       description: 'Manage and track purchase requests.',
       icon: <DollarSign size={40} />,
-      nav: 'bac-payroll',
+      nav: 'bac-pr',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600'
     },

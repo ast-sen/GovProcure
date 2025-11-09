@@ -9,6 +9,9 @@ import PurchaseOrder from './pages/reports/PurchaseOrder';
 import InspectionAcceptanceReport from './pages/reports/AcceptanceForm';
 import ApprovalsScreen from './pages/reports/Approvals';
 import PPMPManagementScreen from './pages/bac/BacPPMP';
+import PRManagementScreen from './pages/bac/BacPR';
+import APPManagementScreen from './pages/bac/BacApp';
+import SettingsScreen from './pages/SettingsScreen';
 
 function App() {
   const [activeNav, setActiveNav] = useState('dashboard');
@@ -21,10 +24,10 @@ function App() {
         return <BACMenu onNavigate={setActiveNav} />;
       case 'bac-ppmp':
         return <PPMPManagementScreen onNavigate={setActiveNav} />;
-      // case 'bac-menu':
-      //   return <BACMenu onNavigate={setActiveNav} />;
-      // case 'bac-menu':
-      //   return <BACMenu onNavigate={setActiveNav} />;
+      case 'bac-pr':
+        return <PRManagementScreen onNavigate={setActiveNav} />;
+      case 'bac-app':
+        return <APPManagementScreen onNavigate={setActiveNav} />;
       case 'project-procurement':
         return <Procurement onNavigate={setActiveNav} />;
       case 'purchase-request':
@@ -38,14 +41,7 @@ function App() {
       case 'reports':
         return <ReportsMenu onNavigate={setActiveNav} />;
       case 'settings':
-        return (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Settings</h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Settings content coming soon...</p>
-            </div>
-          </div>
-        );
+        return <SettingsScreen onNavigate={setActiveNav} />;
       default:
         return <Dashboard />;
     }
