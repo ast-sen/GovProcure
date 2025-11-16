@@ -1,4 +1,4 @@
-import { FileText, List, BarChart3, FolderOpen } from 'lucide-react';
+import { FileText, List, BarChart3, FolderOpen, UserCheck, Building2 } from 'lucide-react';
 import { QuickAction, Activity, Stat } from '../types';
 import { StatCard } from '../components/ui/StatCard';
 import { QuickActionCard } from '../components/ui/QuickActionCard';
@@ -27,8 +27,25 @@ const quickActions: QuickAction[] = [
     id: 'reports',
     title: 'Reports', 
     icon: BarChart3, 
-    description: 'View all available APP items',
+    description: 'View all available forms',
     color: 'bg-purple-500'
+  }
+];
+
+const approvalActions: QuickAction[] = [
+  { 
+    id: 'head-of-office',
+    title: 'Head of Office', 
+    icon: UserCheck, 
+    description: 'Head of Office approvals',
+    color: 'bg-indigo-500'
+  },
+  { 
+    id: 'mayors-office',
+    title: 'Mayor\'s Office', 
+    icon: Building2, 
+    description: 'Mayor\'s Office approvals',
+    color: 'bg-rose-500'
   },
   { 
     id: 'bac-menu',
@@ -55,12 +72,12 @@ const recentActivities: Activity[] = [
 
 export function Dashboard({ onNavigate }: DashboardProps) {
   const handleQuickAction = (actionId: string) => {
-    console.log('Quick action clicked:', actionId); // Debug log
+    console.log('Quick action clicked:', actionId);
     if (onNavigate) {
-      console.log('Navigating to:', actionId); // Debug log
+      console.log('Navigating to:', actionId);
       onNavigate(actionId);
     } else {
-      console.log('onNavigate function not provided'); // Debug log
+      console.log('onNavigate function not provided');
     }
   };
 
@@ -82,8 +99,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       {/* Quick Actions */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map(action => (
+            <QuickActionCard 
+              key={action.id} 
+              action={action}
+              onClick={() => handleQuickAction(action.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* For Approval Section */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">For Approval</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {approvalActions.map(action => (
             <QuickActionCard 
               key={action.id} 
               action={action}

@@ -4,14 +4,13 @@ import { Dashboard } from './pages/Dashboard';
 import { Procurement } from './pages/ProjectProcurement';
 import { PurchaseRequest} from './pages/PurchaseRequest';
 import { ReportsMenu } from './pages/reports/Reports';
-import BACMenu from './pages/bac/BacMenu';
+import BACMenu from './pages/BacMenu';
 import PurchaseOrder from './pages/reports/PurchaseOrder';
 import InspectionAcceptanceReport from './pages/reports/AcceptanceForm';
 import ApprovalsScreen from './pages/reports/Approvals';
-import PPMPManagementScreen from './pages/bac/BacPPMP';
-import PRManagementScreen from './pages/bac/BacPR';
-import APPManagementScreen from './pages/bac/BacApp';
 import SettingsScreen from './pages/SettingsScreen';
+import HeadOfficeApprovalScreen from './pages/HeadOfficeApprovalScreen';
+import MayorApprovalScreen from './pages/MayorApprovalScreen';
 
 function App() {
   const [activeNav, setActiveNav] = useState('dashboard');
@@ -20,14 +19,12 @@ function App() {
     switch (activeNav) {
       case 'dashboard':
         return <Dashboard onNavigate={setActiveNav}/>;
+      case 'head-of-office':
+        return <HeadOfficeApprovalScreen onNavigate={setActiveNav}/>;
+      case 'mayors-office':
+        return <MayorApprovalScreen onNavigate={setActiveNav}/>;
       case 'bac-menu':
         return <BACMenu onNavigate={setActiveNav} />;
-      case 'bac-ppmp':
-        return <PPMPManagementScreen onNavigate={setActiveNav} />;
-      case 'bac-pr':
-        return <PRManagementScreen onNavigate={setActiveNav} />;
-      case 'bac-app':
-        return <APPManagementScreen onNavigate={setActiveNav} />;
       case 'project-procurement':
         return <Procurement onNavigate={setActiveNav} />;
       case 'purchase-request':

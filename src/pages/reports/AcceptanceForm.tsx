@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Printer, ArrowLeft } from 'lucide-react';
+import { Save, Printer, ArrowLeft, Download, Eye, X } from 'lucide-react';
 
 interface IARItem {
   id: string;
@@ -14,6 +14,8 @@ interface InspectionAcceptanceReportProps {
 }
 
 export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceReportProps) => {
+  const [showPreview, setShowPreview] = useState(false);
+  
   const [formData, setFormData] = useState({
     supplier: '',
     prNo: '',
@@ -27,8 +29,6 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
     propertyOfficer: '',
   });
 
-  // Simulated database data - in real app, this would come from your backend/PO
-  // All fields are read-only since they come from the Purchase Order
   const items: IARItem[] = [
     {
       id: '1',
@@ -53,6 +53,23 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
     },
   ];
 
+  const loadScript = (src: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const existingScript = document.querySelector(`script[src="${src}"]`);
+      if (existingScript) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+      document.head.appendChild(script);
+    });
+  };
+
   const handleSubmit = () => {
     console.log('Form Data:', formData);
     console.log('Items:', items);
@@ -61,6 +78,177 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handlePreview = () => {
+    setShowPreview(true);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const downloadBtn = document.getElementById('download-btn');
+      if (downloadBtn) {
+        downloadBtn.innerHTML = '<span>Loading libraries...</span>';
+      }
+
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const html2canvas = (window as any).html2canvas;
+      const jsPDFLib = (window as any).jspdf;
+
+      if (!html2canvas || !jsPDFLib || !jsPDFLib.jsPDF) {
+        throw new Error('Libraries failed to load');
+      }
+
+      const { jsPDF } = jsPDFLib;
+
+      const element = document.getElementById('printable-area');
+      if (!element) {
+        alert('Print area not found');
+        if (downloadBtn) {
+          downloadBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>PDF</span>';
+        }
+        return;
+      }
+
+      if (downloadBtn) {
+        downloadBtn.innerHTML = '<span>Generating PDF...</span>';
+      }
+
+      const originalDisplay = element.style.display;
+      element.style.display = 'block';
+      element.style.position = 'absolute';
+      element.style.left = '-9999px';
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      element.style.display = originalDisplay;
+      element.style.position = '';
+      element.style.left = '';
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'legal'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      const margin = 10;
+      const availableWidth = pdfWidth - (2 * margin);
+      const availableHeight = pdfHeight - (2 * margin);
+      
+      const widthRatio = availableWidth / imgWidth;
+      const scaledHeight = imgHeight * widthRatio;
+      
+      if (scaledHeight <= availableHeight) {
+        pdf.addImage(imgData, 'PNG', margin, margin, availableWidth, scaledHeight);
+      } else {
+        let remainingHeight = scaledHeight;
+        let sourceY = 0;
+        let pageNumber = 0;
+        
+        while (remainingHeight > 0) {
+          if (pageNumber > 0) {
+            pdf.addPage();
+          }
+          
+          const heightForThisPage = Math.min(availableHeight, remainingHeight);
+          const sourceHeight = heightForThisPage / widthRatio;
+          
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sourceHeight;
+          const pageCtx = pageCanvas.getContext('2d');
+          
+          if (pageCtx) {
+            pageCtx.drawImage(
+              canvas,
+              0, sourceY,
+              canvas.width, sourceHeight,
+              0, 0,
+              canvas.width, sourceHeight
+            );
+            
+            const pageImgData = pageCanvas.toDataURL('image/png');
+            pdf.addImage(pageImgData, 'PNG', margin, margin, availableWidth, heightForThisPage);
+          }
+          
+          sourceY += sourceHeight;
+          remainingHeight -= heightForThisPage;
+          pageNumber++;
+        }
+      }
+      
+      const pdfBlob = pdf.output('blob');
+      const defaultFilename = `IAR-${formData.poNo || 'draft'}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await (window as any).showSaveFilePicker({
+            suggestedName: defaultFilename,
+            types: [{
+              description: 'PDF Files',
+              accept: { 'application/pdf': ['.pdf'] }
+            }]
+          });
+
+          const writable = await handle.createWritable();
+          await writable.write(pdfBlob);
+          await writable.close();
+          
+          if (downloadBtn) {
+            downloadBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>PDF</span>';
+          }
+
+          alert('PDF saved successfully!');
+        } catch (err: any) {
+          if (err.name === 'AbortError') {
+            if (downloadBtn) {
+              downloadBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>PDF</span>';
+            }
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = defaultFilename;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
+        if (downloadBtn) {
+          downloadBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>PDF</span>';
+        }
+
+        alert('PDF generated successfully!');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert(`Error generating PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      const downloadBtn = document.getElementById('download-btn');
+      if (downloadBtn) {
+        downloadBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>PDF</span>';
+      }
+    }
   };
 
   return (
@@ -95,148 +283,6 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
           .no-print {
             display: none !important;
           }
-          
-          .print-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 8pt;
-          }
-          
-          .print-table th,
-          .print-table td {
-            border: 1px solid #000 !important;
-            padding: 3px !important;
-            text-align: center;
-          }
-          
-          .print-table th {
-            background-color: #e5e7eb !important;
-            font-weight: bold;
-            font-size: 7pt;
-          }
-          
-          .print-header {
-            text-align: center;
-            margin-bottom: 10px;
-            border: 2px solid #000;
-            padding: 8px;
-            position: relative;
-          }
-          
-          .print-header h1 {
-            font-size: 14pt;
-            font-weight: bold;
-            margin: 3px 0;
-          }
-          
-          .print-header .subtitle {
-            font-size: 10pt;
-            margin: 2px 0;
-          }
-          
-          .print-header .annex {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            font-size: 9pt;
-            font-weight: bold;
-          }
-          
-          .print-info {
-            font-size: 8pt;
-            margin-bottom: 8px;
-          }
-          
-          .print-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #000;
-            padding: 5px;
-          }
-          
-          .print-info-item {
-            display: flex;
-            gap: 5px;
-            font-size: 8pt;
-          }
-          
-          .print-inspection-section {
-            border: 1px solid #000;
-            padding: 8px;
-            margin: 8px 0;
-            font-size: 8pt;
-          }
-          
-          .print-checkbox-section {
-            display: flex;
-            gap: 20px;
-            margin: 10px 0;
-            font-size: 9pt;
-          }
-          
-          .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-          }
-          
-          .checkbox {
-            width: 15px;
-            height: 15px;
-            border: 1px solid #000;
-            display: inline-block;
-          }
-          
-          .checkbox.checked::after {
-            content: '✓';
-            display: block;
-            text-align: center;
-            font-weight: bold;
-          }
-          
-          .print-signatures {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-            font-size: 8pt;
-          }
-          
-          .signature-block {
-            border: 1px solid #000;
-            padding: 8px;
-            min-height: 80px;
-          }
-          
-          .signature-label {
-            font-weight: bold;
-            margin-bottom: 3px;
-            font-size: 8pt;
-          }
-          
-          .signature-line {
-            border-bottom: 1px solid #000;
-            margin: 25px 0 3px 0;
-            text-align: center;
-          }
-          
-          .text-right {
-            text-align: right;
-          }
-          
-          .text-left {
-            text-align: left;
-          }
-          
-          .text-center {
-            text-align: center;
-          }
-          
-          .font-bold {
-            font-weight: bold;
-          }
         }
       `}</style>
 
@@ -250,7 +296,7 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft size={20} />
-                <span>Back </span>
+                <span>Back</span>
               </button>
             )}
             <div>
@@ -261,6 +307,23 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
             </div>
           </div>
           <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handlePreview}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Eye size={20} />
+              Preview
+            </button>
+            <button
+              id="download-btn"
+              type="button"
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Download size={20} />
+              PDF
+            </button>
             <button
               type="button"
               onClick={handlePrint}
@@ -399,7 +462,6 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
                       </td>
                     </tr>
                   ))}
-                  {/* Empty rows */}
                   {Array.from({ length: Math.max(0, 30 - items.length) }).map((_, idx) => (
                     <tr key={`empty-${idx}`} className="bg-gray-50">
                       <td className="border border-gray-300 px-3 py-3 text-center">
@@ -486,101 +548,234 @@ export const InspectionAcceptanceReport = ({ onNavigate }: InspectionAcceptanceR
         </div>
       </div>
 
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800">Preview IAR (Legal Landscape)</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDownloadPDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <Download size={18} />
+                  Download PDF
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer size={18} />
+                  Print
+                </button>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <X size={18} />
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-auto p-6 bg-gray-100">
+              <div className="bg-white shadow-lg mx-auto" style={{ width: '355.6mm', minHeight: '215.9mm', padding: '15mm' }}>
+                <div style={{ position: 'relative', textAlign: 'center', marginBottom: '10px', border: '2px solid #000', padding: '8px' }}>
+                  <div style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '9pt', fontWeight: 'bold' }}>ANNEX G-7</div>
+                  <h1 style={{ fontSize: '14pt', fontWeight: 'bold', margin: '3px 0' }}>INSPECTION & ACCEPTANCE REPORT</h1>
+                  <p style={{ fontSize: '10pt', margin: '2px 0' }}>Kadingilan, Bukidnon</p>
+                  <p style={{ fontSize: '10pt', margin: '2px 0' }}>LGU</p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px', marginBottom: '8px', border: '1px solid #000', padding: '5px', fontSize: '8pt' }}>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>Supplier:</strong>
+                    <span>{formData.supplier}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>P.R. No:</strong>
+                    <span>{formData.prNo}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>P.R. Date:</strong>
+                    <span>{formData.prDate}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px', marginBottom: '8px', border: '1px solid #000', padding: '5px', fontSize: '8pt' }}>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>P.O. No:</strong>
+                    <span>{formData.poNo}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>Date Received:</strong>
+                    <span>{formData.dateReceived}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <strong>Date Inspected:</strong>
+                    <span>{formData.dateInspected}</span>
+                  </div>
+                </div>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8pt', marginBottom: '8px' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: '50px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Item No.</th>
+                      <th style={{ width: '70px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Unit</th>
+                      <th style={{ width: '80px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Quantity</th>
+                      <th style={{ border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.itemNo}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.unit}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.quantity}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'left' }}>{item.description}</td>
+                      </tr>
+                    ))}
+                    {Array.from({ length: Math.max(0, 30 - items.length) }).map((_, idx) => (
+                      <tr key={`empty-${idx}`}>
+                        <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{items.length + idx + 1}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
+                        <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
+                        <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div style={{ border: '1px solid #000', padding: '8px', margin: '8px 0', fontSize: '8pt' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '3px' }}>INSPECTION</div>
+                  <p style={{ marginBottom: '10px', fontSize: '8pt' }}>
+                    Inspected, verified and found OK as to quantity and specifications
+                  </p>
+                  <div style={{ borderBottom: '1px solid #000', margin: '25px 0 3px 0', textAlign: 'center' }}>{formData.inspectionOfficer}</div>
+                  <div style={{ textAlign: 'center', fontSize: '7pt', marginTop: '2px' }}>Inspection Officer</div>
+                </div>
+
+                <div style={{ border: '1px solid #000', padding: '8px', margin: '8px 0', fontSize: '8pt' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '3px' }}>ACCEPTANCE</div>
+                  <div style={{ display: 'flex', gap: '20px', margin: '10px 0', fontSize: '9pt' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <div style={{ width: '15px', height: '15px', border: '1px solid #000', display: 'inline-block', textAlign: 'center', fontWeight: 'bold' }}>
+                        {formData.acceptanceComplete ? '✓' : ''}
+                      </div>
+                      <span>Complete</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <div style={{ width: '15px', height: '15px', border: '1px solid #000', display: 'inline-block', textAlign: 'center', fontWeight: 'bold' }}>
+                        {formData.acceptancePartial ? '✓' : ''}
+                      </div>
+                      <span>Partial</span>
+                    </div>
+                  </div>
+                  <div style={{ borderBottom: '1px solid #000', margin: '25px 0 3px 0', textAlign: 'center' }}>{formData.propertyOfficer}</div>
+                  <div style={{ textAlign: 'center', fontSize: '7pt', marginTop: '2px' }}>Property Officer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Print View */}
-      <div id="printable-area" style={{ display: 'none' }}>
-        <div className="print-header" style={{ position: 'relative' }}>
-          <div className="annex">ANNEX G-7</div>
-          <h1>INSPECTION & ACCEPTANCE REPORT</h1>
-          <p className="subtitle">Kadingilan, Bukidnon</p>
-          <p className="subtitle">LGU</p>
+      <div id="printable-area" style={{ display: 'none', padding: '15mm', backgroundColor: '#ffffff', width: '355.6mm', minHeight: '215.9mm' }}>
+        <div style={{ position: 'relative', textAlign: 'center', marginBottom: '10px', border: '2px solid #000', padding: '8px' }}>
+          <div style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '9pt', fontWeight: 'bold' }}>ANNEX G-7</div>
+          <h1 style={{ fontSize: '14pt', fontWeight: 'bold', margin: '3px 0' }}>INSPECTION & ACCEPTANCE REPORT</h1>
+          <p style={{ fontSize: '10pt', margin: '2px 0' }}>Kadingilan, Bukidnon</p>
+          <p style={{ fontSize: '10pt', margin: '2px 0' }}>LGU</p>
         </div>
 
-        <div className="print-info-grid">
-          <div className="print-info-item">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px', marginBottom: '8px', border: '1px solid #000', padding: '5px', fontSize: '8pt' }}>
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>Supplier:</strong>
             <span>{formData.supplier}</span>
           </div>
-          <div className="print-info-item">
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>P.R. No:</strong>
             <span>{formData.prNo}</span>
           </div>
-          <div className="print-info-item">
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>P.R. Date:</strong>
             <span>{formData.prDate}</span>
           </div>
         </div>
 
-        <div className="print-info-grid">
-          <div className="print-info-item">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px', marginBottom: '8px', border: '1px solid #000', padding: '5px', fontSize: '8pt' }}>
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>P.O. No:</strong>
             <span>{formData.poNo}</span>
           </div>
-          <div className="print-info-item">
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>Date Received:</strong>
             <span>{formData.dateReceived}</span>
           </div>
-          <div className="print-info-item">
+          <div style={{ display: 'flex', gap: '5px' }}>
             <strong>Date Inspected:</strong>
             <span>{formData.dateInspected}</span>
           </div>
         </div>
 
-        <table className="print-table">
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8pt', marginBottom: '8px', border: '1px solid #000' }}>
           <thead>
             <tr>
-              <th style={{ width: '50px' }}>Item No.</th>
-              <th style={{ width: '70px' }}>Unit</th>
-              <th style={{ width: '80px' }}>Quantity</th>
-              <th>Description</th>
+              <th style={{ width: '50px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Item No.</th>
+              <th style={{ width: '70px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Unit</th>
+              <th style={{ width: '80px', border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Quantity</th>
+              <th style={{ border: '1px solid #000', padding: '3px', backgroundColor: '#e5e7eb', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt' }}>Description</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="text-center">{item.itemNo}</td>
-                <td className="text-center">{item.unit}</td>
-                <td className="text-center">{item.quantity}</td>
-                <td className="text-left">{item.description}</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.itemNo}</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.unit}</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item.quantity}</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'left' }}>{item.description}</td>
               </tr>
             ))}
             {Array.from({ length: Math.max(0, 30 - items.length) }).map((_, idx) => (
               <tr key={`empty-${idx}`}>
-                <td className="text-center">{items.length + idx + 1}</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{items.length + idx + 1}</td>
+                <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
+                <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
+                <td style={{ border: '1px solid #000', padding: '3px' }}>&nbsp;</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <div className="print-inspection-section">
-          <div className="signature-label">INSPECTION</div>
+        <div style={{ border: '1px solid #000', padding: '8px', margin: '8px 0', fontSize: '8pt' }}>
+          <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '3px' }}>INSPECTION</div>
           <p style={{ marginBottom: '10px', fontSize: '8pt' }}>
             Inspected, verified and found OK as to quantity and specifications
           </p>
-          <div className="signature-line">{formData.inspectionOfficer}</div>
-          <div className="text-center" style={{ fontSize: '7pt', marginTop: '2px' }}>
-            Inspection Officer
-          </div>
+          <div style={{ borderBottom: '1px solid #000', margin: '25px 0 3px 0', textAlign: 'center' }}>{formData.inspectionOfficer}</div>
+          <div style={{ textAlign: 'center', fontSize: '7pt', marginTop: '2px' }}>Inspection Officer</div>
         </div>
 
-        <div className="print-inspection-section">
-          <div className="signature-label">ACCEPTANCE</div>
-          <div className="print-checkbox-section">
-            <div className="checkbox-item">
-              <div className={`checkbox ${formData.acceptanceComplete ? 'checked' : ''}`}></div>
+        <div style={{ border: '1px solid #000', padding: '8px', margin: '8px 0', fontSize: '8pt' }}>
+          <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '3px' }}>ACCEPTANCE</div>
+          <div style={{ display: 'flex', gap: '20px', margin: '10px 0', fontSize: '9pt' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ width: '15px', height: '15px', border: '1px solid #000', display: 'inline-block', textAlign: 'center', fontWeight: 'bold' }}>
+                {formData.acceptanceComplete ? '✓' : ''}
+              </div>
               <span>Complete</span>
             </div>
-            <div className="checkbox-item">
-              <div className={`checkbox ${formData.acceptancePartial ? 'checked' : ''}`}></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ width: '15px', height: '15px', border: '1px solid #000', display: 'inline-block', textAlign: 'center', fontWeight: 'bold' }}>
+                {formData.acceptancePartial ? '✓' : ''}
+              </div>
               <span>Partial</span>
             </div>
           </div>
-          <div className="signature-line">{formData.propertyOfficer}</div>
-          <div className="text-center" style={{ fontSize: '7pt', marginTop: '2px' }}>
-            Property Officer
-          </div>
+          <div style={{ borderBottom: '1px solid #000', margin: '25px 0 3px 0', textAlign: 'center' }}>{formData.propertyOfficer}</div>
+          <div style={{ textAlign: 'center', fontSize: '7pt', marginTop: '2px' }}>Property Officer</div>
         </div>
       </div>
     </>
