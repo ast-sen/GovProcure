@@ -25,3 +25,11 @@ export interface Stat {
   change: string;
   trend: 'up' | 'down' | 'neutral';
 }
+export interface HistoryItem {
+  id: string;
+  title: string;
+  type: string;
+  status: 'draft' | 'submitted';
+  date: string;
+  prNo?: string;
+}

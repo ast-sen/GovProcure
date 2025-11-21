@@ -48,10 +48,10 @@ const approvalActions: QuickAction[] = [
     color: 'bg-rose-500'
   },
   { 
-    id: 'bac-menu',
-    title: 'BAC Menu', 
+    id: 'mbo-approval',
+    title: 'MBO Approval', 
     icon: FolderOpen, 
-    description: 'Bids and Awards Committee',
+    description: 'Municipal Budget Office',
     color: 'bg-orange-500'
   }
 ];
@@ -60,7 +60,7 @@ const stats: Stat[] = [
   { label: 'Pending PRs', value: '24', change: '+12%', trend: 'up' },
   { label: 'Approved This Month', value: '156', change: '+8%', trend: 'up' },
   { label: 'Total Budget Used', value: '₱2.4M', change: '68%', trend: 'neutral' },
-  { label: 'Active Suppliers', value: '45', change: '+5', trend: 'up' }
+  { label: 'Total Available Budget', value: '₱950K', change: '-75%', trend: 'down' }
 ];
 
 const recentActivities: Activity[] = [

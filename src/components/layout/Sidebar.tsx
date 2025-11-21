@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
   { id: 'project-procurement', label: 'Project Procurement', icon: ShoppingCart },
   { id: 'purchase-request', label: 'Purchase Request', icon: DollarSign },
   { id: 'reports', label: 'Reports', icon: Folder },
-  { id: 'bac-menu', label: 'BAC Menu', icon: UserStar },
+  { id: 'mbo-approval', label: 'MBO Approval', icon: UserStar },
   { id: 'settings', label: 'Settings', icon: Settings }
 ];
 

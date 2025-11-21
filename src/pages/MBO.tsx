@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, FileText, DollarSign, FileBarChart, Plus, Edit, Trash2, Eye, CheckCircle, XCircle, Clock, ArrowLeft, Users } from 'lucide-react';
 
-interface BACItem {
+interface MBOItem {
   id: number;
   type: 'PPMP' | 'PR' | 'APP';
   transactionNumber: string;
@@ -18,21 +18,21 @@ interface BACItem {
   items?: number;
 }
 
-interface BACScreenProps {
+interface MBOScreenProps {
   onNavigate?: (nav: string) => void;
 }
 
-const BACMenu = ({ onNavigate }: BACScreenProps) => {
-  const [items, setItems] = useState<BACItem[]>([]);
+const MBOApproval = ({ onNavigate }: MBOScreenProps) => {
+  const [items, setItems] = useState<MBOItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'PPMP' | 'PR' | 'APP'>('All');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Draft' | 'Pending' | 'Approved' | 'Rejected'>('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<BACItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MBOItem | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const fetchBACItems = async () => {
+  const fetchMBOItems = async () => {
     setLoading(true);
     const USE_MOCK_DATA = true;
     
@@ -45,7 +45,7 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
     }
 
     try {
-      const response = await fetch('/api/bac-items');
+      const response = await fetch('/api/mbo-items');
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
       setItems(data);
@@ -180,7 +180,7 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
   };
 
   useEffect(() => {
-    fetchBACItems();
+    fetchMBOItems();
   }, []);
 
   const filteredItems = items.filter(item => {
@@ -198,7 +198,7 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const handleViewDetails = (item: BACItem) => {
+  const handleViewDetails = (item: MBOItem) => {
     setSelectedItem(item);
     setShowDetailsModal(true);
   };
@@ -209,7 +209,7 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
     }
   };
 
-  const getStatusBadge = (status: BACItem['status']) => {
+  const getStatusBadge = (status: MBOItem['status']) => {
     const styles = {
       Draft: 'bg-gray-100 text-gray-800',
       Pending: 'bg-yellow-100 text-yellow-800',
@@ -283,7 +283,7 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
                 <Users className="text-blue-600" size={32} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">Bids and Awards Committee</h1>
+                <h1 className="text-3xl font-bold text-gray-800">Municipal Budget Office</h1>
                 <p className="text-gray-600">Manage procurement plans, purchase requests, and annual procurement</p>
               </div>
             </div>
@@ -625,4 +625,4 @@ const BACMenu = ({ onNavigate }: BACScreenProps) => {
   );
 };
 
-export default BACMenu;
+export default MBOApproval;

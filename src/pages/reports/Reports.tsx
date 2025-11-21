@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, FileText, ClipboardCheck, CheckCircle, TrendingUp } from 'lucide-react';
+import { Package, FileText, ClipboardCheck, CheckCircle, TrendingUp, FileBox, FolderCheck, Handshake, Files } from 'lucide-react';
 import BalanceItemsModal from './BalanceItemsModal'; // Import the modal
 
 interface ReportsMenuProps {
@@ -39,14 +39,50 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       useModal: false
     },
     {
+      title: 'Requisition & Issue Slip',
+      description: 'Track and monitor approval status across all processes',
+      icon: <FileBox size={40} />,
+      nav: 'reports-ris',
+      color: 'bg-pink-500',
+      hoverColor: 'hover:bg-purple-600',
+      useModal: false
+    },
+    {
       title: 'Approvals',
       description: 'Track and monitor approval status across all processes',
-      icon: <CheckCircle size={40} />,
+      icon: <FolderCheck size={40} />,
       nav: 'reports-approvals',
       color: 'bg-purple-500',
       hoverColor: 'hover:bg-purple-600',
       useModal: false
-    }
+    },
+    {
+      title: 'Obligation Slip',
+      description: 'Track and monitor approval status across all processes',
+      icon: <Files size={40} />,
+      nav: 'reports-os',
+      color: 'bg-cyan-500',
+      hoverColor: 'hover:bg-purple-600',
+      useModal: false
+    },
+    {
+      title: 'Abstract of Bids',
+      description: 'Track and monitor approval status across all processes',
+      icon: <Handshake size={40} />,
+      nav: 'reports-abstract',
+      color: 'bg-indigo-500',
+      hoverColor: 'hover:bg-purple-600',
+      useModal: false
+    },
+    {
+      title: 'Request for Quotation',
+      description: 'Track and monitor approval status across all processes',
+      icon: <CheckCircle size={40} />,
+      nav: 'reports-ris',
+      color: 'bg-yellow-500',
+      hoverColor: 'hover:bg-purple-600',
+      useModal: false
+    },
   ];
 
   // Handle click based on whether it should open a modal or navigate
