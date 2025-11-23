@@ -20,8 +20,12 @@ export const usePurchaseRequest = () => {
     filenamePrefix: 'PR'
   });
   
-  // ADDED: Success modal hook
   const { isOpen, modalMessage, modalTitle, showSuccess, closeModal } = useSuccessModal();
+
+  // Save draft modal state
+  const [saveDraftModalOpen, setSaveDraftModalOpen] = useState(false);
+  const [saveDraftLoading, setSaveDraftLoading] = useState(false);
+  const [draftTitle, setDraftTitle] = useState('');
 
   const {
     showHistoryModal,
@@ -37,8 +41,8 @@ export const usePurchaseRequest = () => {
     prNo: '',
     date: new Date().toISOString().split('T')[0],
     purpose: '',
-    requestedBy: { name: '', designation: '' },
-    approvedBy: { name: 'Municipal Mayor', designation: 'Head of Office/Department' }
+    requestedBy: { name: '', designation: '', signature: '' },
+    approvedBy: { name: 'Municipal Mayor', designation: 'Head of Office/Department', signature: '' }
   });
 
   const [items, setItems] = useState<PRItem[]>([
@@ -92,9 +96,32 @@ export const usePurchaseRequest = () => {
     }, 0).toFixed(2);
   };
 
+  // Internal save draft logic
+  const saveDraft = (title: string) => {
+    console.log('Saving PR as draft with title:', title);
+    console.log('Form Data:', formData);
+    console.log('Items:', items);
+    // Add your actual save logic here (API call, localStorage, etc.)
+  };
+
+  // Handler for save draft modal
+  const handleSaveDraftWithTitle = async (title: string) => {
+    setSaveDraftLoading(true);
+    try {
+      setDraftTitle(title);
+      saveDraft(title);
+      setSaveDraftModalOpen(false);
+      showSuccess(`Your draft "${title}" has been saved successfully!`, 'Draft Saved');
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+    } finally {
+      setSaveDraftLoading(false);
+    }
+  };
+
+  // Opens the save draft modal
   const handleSaveDraft = () => {
-    console.log('Saving as draft...');
-    showSuccess('Purchase Request has been saved as draft!', 'Draft Saved');
+    setSaveDraftModalOpen(true);
   };
 
   const handleSubmitForApproval = () => {
@@ -106,8 +133,6 @@ export const usePurchaseRequest = () => {
     console.log('Form Data:', formData);
     console.log('Items:', items);
     console.log('Total:', calculateTotal());
-    
-    // CHANGED: Show success modal instead of alert
     showSuccess('Purchase Request has been saved successfully!', 'Request Saved');
   };
 
@@ -122,15 +147,21 @@ export const usePurchaseRequest = () => {
   const handleDownloadPDF = async () => {
     const filename = `PR-${formData.prNo || 'draft'}-${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // CHANGED: Pass success callback
     const success = await generatePDF('printable-area', filename, () => {
       showSuccess('Your PDF has been saved successfully!', 'PDF Saved');
     });
     
     if (!success) {
-      // User cancelled
       console.log('PDF generation cancelled');
     }
+  };
+
+  const saveDraftModal = {
+    isOpen: saveDraftModalOpen,
+    isLoading: saveDraftLoading,
+    open: () => setSaveDraftModalOpen(true),
+    close: () => setSaveDraftModalOpen(false),
+    onSave: handleSaveDraftWithTitle,
   };
 
   return {
@@ -138,6 +169,8 @@ export const usePurchaseRequest = () => {
     items,
     showPreview,
     isGenerating,
+    draftTitle,
+    saveDraftModal,
     setShowPreview,
     addNewItem,
     removeItem,

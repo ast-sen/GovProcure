@@ -13,10 +13,14 @@ export const usePPMP = () => {
     filenamePrefix: 'PPMP'
   });
   
-  // ADDED: Success modal hook
   const { isOpen, modalMessage, modalTitle, showSuccess, closeModal } = useSuccessModal();
+  
+  // Save draft modal state
+  const [saveDraftModalOpen, setSaveDraftModalOpen] = useState(false);
+  const [saveDraftLoading, setSaveDraftLoading] = useState(false);
+  const [draftTitle, setDraftTitle] = useState('');
 
-   const {
+  const {
     showHistoryModal,
     historyItems,
     handleViewHistory,
@@ -29,16 +33,18 @@ export const usePPMP = () => {
     officeAgency: '',
     preparedBy: '',
     approvedBy: '',
+    transactionNumber: '',
   });
 
   const [items, setItems] = useState<PPMPItem[]>([
     { id: '1', ...INITIAL_PPMP_ITEM }
   ]);
 
-  const addNewItem = () => {
+  const addNewItem = (category?: string) => {
     const newItem: PPMPItem = {
       id: Date.now().toString(),
-      ...INITIAL_PPMP_ITEM
+      ...INITIAL_PPMP_ITEM,
+      category: category || 'COMMON USED SUPPLIES'
     };
     setItems([...items, newItem]);
   };
@@ -63,8 +69,6 @@ export const usePPMP = () => {
     e.preventDefault();
     console.log('Form Data:', formData);
     console.log('Items:', items);
-    
-    // CHANGED: Show success modal instead of alert
     showSuccess('PPMP has been saved successfully!', 'PPMP Saved');
   };
 
@@ -72,11 +76,37 @@ export const usePPMP = () => {
     window.print();
   };
 
-   const handleSaveDraft = () => {
-    console.log('Saving as draft...');
+  // Internal save draft logic (without modal)
+  const saveDraft = (title: string) => {
+    console.log('Saving as draft with title:', title);
     console.log('Form Data:', formData);
     console.log('Items:', items);
-    showSuccess('Purchase Request has been saved as draft!', 'Draft Saved');
+    // Add your actual save logic here (API call, localStorage, etc.)
+  };
+
+  // Handler for save draft modal
+  const handleSaveDraftWithTitle = async (title: string) => {
+    setSaveDraftLoading(true);
+    try {
+      // Store the title
+      setDraftTitle(title);
+      
+      // Call save draft logic
+      saveDraft(title);
+      
+      // Close modal and show success
+      setSaveDraftModalOpen(false);
+      showSuccess(`Your draft "${title}" has been saved successfully!`, 'Draft Saved');
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+    } finally {
+      setSaveDraftLoading(false);
+    }
+  };
+
+  // Legacy handler (if still needed elsewhere)
+  const handleSaveDraft = () => {
+    setSaveDraftModalOpen(true);
   };
 
   const handleSubmitForApproval = () => {
@@ -93,7 +123,6 @@ export const usePPMP = () => {
   const handleDownloadPDF = async () => {
     const filename = `PPMP-${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // CHANGED: Pass success callback
     const success = await generatePDF('printable-area', filename, () => {
       showSuccess('Your PDF has been saved successfully!', 'PDF Saved');
     });
@@ -103,11 +132,21 @@ export const usePPMP = () => {
     }
   };
 
+  const saveDraftModal = {
+    isOpen: saveDraftModalOpen,
+    isLoading: saveDraftLoading,
+    open: () => setSaveDraftModalOpen(true),
+    close: () => setSaveDraftModalOpen(false),
+    onSave: handleSaveDraftWithTitle,
+  };
+
   return {
     formData,
     items,
     showPreview,
     isGenerating,
+    draftTitle,
+    saveDraftModal,
     setShowPreview,
     addNewItem,
     removeItem,
@@ -120,7 +159,6 @@ export const usePPMP = () => {
     handleSaveDraft,          
     handleSubmitForApproval,   
     
-    // ADDED: Return success modal props
     successModal: {
       isOpen,
       message: modalMessage,

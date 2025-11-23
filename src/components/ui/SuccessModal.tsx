@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { CheckCircle, X } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   autoClose = true,
   autoCloseDelay = 2000
 }) => {
+  const { darkMode, styles } = useTheme();
+
   useEffect(() => {
     if (isOpen && autoClose) {
       const timer = setTimeout(() => {
@@ -32,12 +35,12 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform animate-slideUp">
+      <div className={`${styles.bgCard} rounded-2xl shadow-2xl max-w-md w-full transform animate-slideUp transition-colors duration-300`}>
         {/* Close button */}
         <div className="flex justify-end p-3">
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors rounded-full p-1 hover:bg-gray-100"
+            className={`${styles.textMuted} hover:${styles.textSecondary} transition-colors rounded-full p-1 ${styles.hoverBg}`}
           >
             <X size={20} />
           </button>
@@ -46,17 +49,17 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         {/* Content */}
         <div className="px-8 pb-8 text-center">
           {/* Success Icon with animation */}
-          <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-scaleIn">
-            <CheckCircle size={48} className="text-green-600" strokeWidth={2} />
+          <div className={`mx-auto w-20 h-20 ${darkMode ? 'bg-green-900/50' : 'bg-green-100'} rounded-full flex items-center justify-center mb-6 animate-scaleIn`}>
+            <CheckCircle size={48} className={darkMode ? 'text-green-400' : 'text-green-600'} strokeWidth={2} />
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+          <h2 className={`text-2xl font-bold ${styles.textPrimary} mb-3`}>
             {title}
           </h2>
 
           {/* Message */}
-          <p className="text-gray-600 text-base leading-relaxed">
+          <p className={`${styles.textSecondary} text-base leading-relaxed`}>
             {message}
           </p>
 
@@ -70,7 +73,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
           {/* Auto-close indicator */}
           {autoClose && (
-            <p className="text-xs text-gray-400 mt-3">
+            <p className={`text-xs ${styles.textMuted} mt-3`}>
               Closing automatically in {autoCloseDelay / 1000} seconds...
             </p>
           )}
@@ -80,50 +83,21 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
       {/* Animations */}
       <style>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-
         @keyframes slideUp {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
-
         @keyframes scaleIn {
-          0% {
-            transform: scale(0);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
+          0% { transform: scale(0); opacity: 0; }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); opacity: 1; }
         }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-
-        .animate-scaleIn {
-          animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+        .animate-slideUp { animation: slideUp 0.3s ease-out; }
+        .animate-scaleIn { animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       `}</style>
     </div>
   );

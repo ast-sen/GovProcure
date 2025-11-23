@@ -1,13 +1,16 @@
 import React from 'react';
-import { PRForm } from '../components/forms/purchase-request/PRForm';
-import { PRPreviewModal } from '../components/templates/purchase-request/PRPreviewModal';
-import { PRPrintTemplate } from '../components/templates/purchase-request/PRPrintTemplate';
+import { PRForm } from '../components/forms/purchase-request-form/PRForm';
+import { PRPreviewModal } from '../components/templates/purchase-request-temp/PRPreviewModal';
+import { PRPrintTemplate } from '../components/templates/purchase-request-temp/PRPrintTemplate';
 import { SuccessModal } from '../components/ui/SuccessModal';
 import { HistoryModal } from '../components/ui/HistoryModal';
 import { usePurchaseRequest } from '../hooks/usePurchaseRequest';
 import { PurchaseRequestProps } from '../types/purchase-request.types';
+import { useTheme } from '../context/ThemeContext';
 
 export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) => {
+  const { styles } = useTheme();
+  
   const {
     formData,
     items,
@@ -29,7 +32,7 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
   } = usePurchaseRequest();
 
   return (
-    <>
+    <div className={styles.bgMain}>
       <PRForm
         formData={formData}
         items={items}
@@ -78,7 +81,7 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
         items={historyModal.items}
         onSelectItem={historyModal.onSelectItem}
       />
-    </>
+    </div>
   );
 };
 

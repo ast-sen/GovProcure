@@ -1,5 +1,6 @@
 export interface PPMPItem {
   id: string;
+  category: string;
   generalDescription: string;
   unit: string;
   qtySize: string;
@@ -31,6 +32,8 @@ export interface PPMPItem {
 }
 
 export interface PPMPFormData {
+  transactionNumber: string;
+  title?: string;  
   endUserName: string;
   officeAgency: string;
   preparedBy: string;

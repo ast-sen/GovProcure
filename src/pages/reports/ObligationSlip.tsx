@@ -1,13 +1,16 @@
 import React from 'react';
-import { ObligationSlipForm } from '../../components/forms/obligation-slip/ObligationSlipForm';
-import { ObligationSlipPreviewModal } from '../../components/templates/os/ObligationSlipPreviewModal';
-import { ObligationSlipPrintTemplate } from '../../components/templates/os/ObligationSlipPrintTemplate';
+import { ObligationSlipForm } from '../../components/forms/os-form/ObligationSlipForm';
+import { ObligationSlipPreviewModal } from '../../components/templates/os-temp/ObligationSlipPreviewModal';
+import { ObligationSlipPrintTemplate } from '../../components/templates/os-temp/ObligationSlipPrintTemplate';
 import { SuccessModal } from '../../components/ui/SuccessModal';
 import { HistoryModal } from '../../components/ui/HistoryModal';
 import { useObligationSlip } from '../../hooks/useObligationSlip';
 import { ObligationSlipHistoryItem, ObligationSlipProps } from '../../types/obligation-slip.types';
+import { useTheme } from '../../context/ThemeContext';
 
 export const ObligationSlip: React.FC<ObligationSlipProps> = ({ onNavigate }) => {
+  const { styles } = useTheme();
+  
   const {
     formData,
     showPreview,
@@ -24,7 +27,7 @@ export const ObligationSlip: React.FC<ObligationSlipProps> = ({ onNavigate }) =>
   } = useObligationSlip();
 
   return (
-    <>
+    <div className={styles.bgMain}>
       <style>{`
         @media print {
           @page { 
@@ -91,11 +94,8 @@ export const ObligationSlip: React.FC<ObligationSlipProps> = ({ onNavigate }) =>
         onSelectItem={historyModal.onSelectItem}
         onClose={historyModal.onClose}
       />
-
-    </>
+    </div>
   );
 };
 
 export default ObligationSlip;
-
-

@@ -1,13 +1,18 @@
 import React from 'react';
-import { PPMPForm } from '../components/forms/ppmp/PPMPForm';
-import { PPMPPreviewModal } from '../components/templates/ppmp/PPMPPreviewModal';
-import { PPMPPrintTemplate } from '../components/templates/ppmp/PPMPPrintTemplate';
-import { SuccessModal } from '../components/ui/SuccessModal';  // ADD THIS
-import { usePPMP } from '../hooks/usePPMP';
-import { PPMPProps } from '../types/ppmp.types';
+import { PPMPForm } from '../components/forms/ppmp-form/PPMPForm';
+import { PPMPPreviewModal } from '../components/templates/ppmp-temp/PPMPPreviewModal';
+import { PPMPPrintTemplate } from '../components/templates/ppmp-temp/PPMPPrintTemplate';
+import { SuccessModal } from '../components/ui/SuccessModal';
 import { HistoryModal } from '../components/ui/HistoryModal';
+import SaveDraftModal from '../components/ui/SaveDraftModal';
+import { usePPMP } from '../hooks/usePPMP';
+import { useSidebarWidth } from '../components/layout/Layout';
+import { PPMPProps } from '../types/ppmp.types';
 
 export const Procurement: React.FC<PPMPProps> = ({ onNavigate }) => {
+  // Get sidebar width from context
+  const { sidebarWidth } = useSidebarWidth();
+
   const {
     formData,
     items,
@@ -21,10 +26,11 @@ export const Procurement: React.FC<PPMPProps> = ({ onNavigate }) => {
     handlePrint,
     handlePreview,
     handleDownloadPDF,
-    handleSaveDraft,        
-    handleSubmitForApproval, 
-    historyModal,      
-    successModal  
+    handleSaveDraft,
+    handleSubmitForApproval,
+    historyModal,
+    successModal,
+    saveDraftModal, 
   } = usePPMP();
 
   return (
@@ -44,8 +50,9 @@ export const Procurement: React.FC<PPMPProps> = ({ onNavigate }) => {
         onViewHistory={historyModal.onViewHistory}
         onDownloadPDF={handleDownloadPDF}
         isGenerating={isGenerating}
+        sidebarWidth={sidebarWidth}
       />
-      
+
       {showPreview && (
         <PPMPPreviewModal
           formData={formData}
@@ -55,13 +62,12 @@ export const Procurement: React.FC<PPMPProps> = ({ onNavigate }) => {
           onPrint={handlePrint}
         />
       )}
-      
+
       <PPMPPrintTemplate
         formData={formData}
         items={items}
       />
-      
-      // ADD THIS SUCCESS MODAL
+
       <SuccessModal
         isOpen={successModal.isOpen}
         onClose={successModal.onClose}
@@ -70,10 +76,20 @@ export const Procurement: React.FC<PPMPProps> = ({ onNavigate }) => {
       />
 
       <HistoryModal
-              isOpen={historyModal.isOpen}
-              onClose={historyModal.onClose}
-              items={historyModal.items}
-              onSelectItem={historyModal.onSelectItem}
+        isOpen={historyModal.isOpen}
+        onClose={historyModal.onClose}
+        items={historyModal.items}
+        onSelectItem={historyModal.onSelectItem}
+      />
+
+      <SaveDraftModal
+        isOpen={saveDraftModal.isOpen}
+        onClose={saveDraftModal.close}
+        onSave={saveDraftModal.onSave}
+        isLoading={saveDraftModal.isLoading}
+        docType="PPMP"
+        office={formData.officeAgency}
+        transactionNumber={formData.transactionNumber}
       />
     </>
   );

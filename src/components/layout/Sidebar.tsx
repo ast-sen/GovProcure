@@ -1,18 +1,21 @@
+// src/components/layout/Sidebar.tsx
 import { 
   Home,
   ShoppingCart,
   DollarSign,
-  UserStar,
+  UserCheck,
   Folder,
   Settings,
   Menu,
   X,
   User,
-  LogOut
+  LogOut,
+  FolderOpen
 } from 'lucide-react';
 import { NavItem } from '../../types';
 import { useState } from 'react';
 import ProfileModal from '../../pages/ProfileModal';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,27 +29,32 @@ const navItems: NavItem[] = [
   { id: 'project-procurement', label: 'Project Procurement', icon: ShoppingCart },
   { id: 'purchase-request', label: 'Purchase Request', icon: DollarSign },
   { id: 'reports', label: 'Reports', icon: Folder },
-  { id: 'mbo-approval', label: 'MBO Approval', icon: UserStar },
+  { id: 'head-of-office', label: 'Head of Office', icon: UserCheck },
+  { id: 'mbo-approval', label: 'MBO Approval', icon: FolderOpen },
   { id: 'settings', label: 'Settings', icon: Settings }
 ];
 
-
 export function Sidebar({ isOpen, activeNav, onToggle, onNavClick }: SidebarProps) {
-  
   const [showProfileModal, setShowProfileModal] = useState(false);
-  
-    const handleLogout = () => {
+  const { darkMode, themeColors } = useTheme();
+
+  // Sidebar can have its own dark variant or follow theme
+  const sidebarBg = darkMode ? 'bg-black' : 'bg-gray-900';
+  const sidebarBorder = darkMode ? 'border-gray-800' : 'border-gray-800';
+  const sidebarHover = darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-800';
+
+  const handleLogout = () => {
     console.log('Logging out...');
   };
 
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
+    <aside className={`${isOpen ? 'w-64' : 'w-20'} ${sidebarBg} text-white transition-all duration-300 flex flex-col`}>
       {/* Logo */}
-      <div className="p-4 flex items-center justify-between border-b border-gray-800">
+      <div className={`p-5 flex items-center justify-between border-b ${sidebarBorder}`}>
         {isOpen && <h1 className="text-xl font-bold">GovProcure</h1>}
         <button 
           onClick={onToggle}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+          className={`p-2 ${sidebarHover} rounded-lg transition-colors`}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -62,8 +70,8 @@ export function Sidebar({ isOpen, activeNav, onToggle, onNavClick }: SidebarProp
               onClick={() => onNavClick(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 activeNav === item.id 
-                  ? 'bg-blue-600 text-white' 
-                  : 'hover:bg-gray-800 text-gray-300'
+                  ? `${themeColors.primary} text-white` 
+                  : `${sidebarHover} text-gray-300`
               }`}
             >
               <Icon size={20} />
@@ -74,12 +82,12 @@ export function Sidebar({ isOpen, activeNav, onToggle, onNavClick }: SidebarProp
       </nav>
 
       {/* Profile */}
-     <div className="p-4 border-t border-gray-800">
+      <div className={`p-4 border-t ${sidebarBorder}`}>
         <button
           onClick={() => setShowProfileModal(true)}
-          className={`w-full flex items-center gap-3 hover:bg-gray-800 rounded-lg p-2 transition-colors ${!isOpen && 'justify-center'}`}
+          className={`w-full flex items-center gap-3 ${sidebarHover} rounded-lg p-2 transition-colors ${!isOpen && 'justify-center'}`}
         >
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className={`w-10 h-10 ${themeColors.primary} rounded-full flex items-center justify-center flex-shrink-0`}>
             <User size={20} />
           </div>
           {isOpen && (
@@ -93,7 +101,7 @@ export function Sidebar({ isOpen, activeNav, onToggle, onNavClick }: SidebarProp
         {isOpen && (
           <button 
             onClick={handleLogout}
-            className="w-full mt-3 flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+            className={`w-full mt-3 flex items-center gap-2 px-4 py-2 text-sm text-gray-300 ${sidebarHover} rounded-lg transition-colors`}
           >
             <LogOut size={16} />
             <span>Logout</span>

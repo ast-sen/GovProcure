@@ -1,8 +1,9 @@
-import { FileText, List, BarChart3, FolderOpen, UserCheck, Building2 } from 'lucide-react';
+import { FileText, List, BarChart3, FolderOpen, UserCheck, FileArchiveIcon } from 'lucide-react';
 import { QuickAction, Activity, Stat } from '../types';
 import { StatCard } from '../components/ui/StatCard';
 import { QuickActionCard } from '../components/ui/QuickActionCard';
 import { ActivityFeed } from '../components/ui/ActivityFeed';
+import { useTheme } from '../context/ThemeContext';
 
 interface DashboardProps {
   onNavigate?: (nav: string) => void;
@@ -41,18 +42,18 @@ const approvalActions: QuickAction[] = [
     color: 'bg-indigo-500'
   },
   { 
-    id: 'mayors-office',
-    title: 'Mayor\'s Office', 
-    icon: Building2, 
-    description: 'Mayor\'s Office approvals',
-    color: 'bg-rose-500'
-  },
-  { 
     id: 'mbo-approval',
     title: 'MBO Approval', 
     icon: FolderOpen, 
     description: 'Municipal Budget Office',
     color: 'bg-orange-500'
+  },
+  { 
+    id: 'accounting-office',
+    title: 'Voucher', 
+    icon: FileArchiveIcon, 
+    description: 'Generate Voucher',
+    color: 'bg-rose-500'
   }
 ];
 
@@ -71,6 +72,8 @@ const recentActivities: Activity[] = [
 ];
 
 export function Dashboard({ onNavigate }: DashboardProps) {
+  const { styles } = useTheme();
+
   const handleQuickAction = (actionId: string) => {
     console.log('Quick action clicked:', actionId);
     if (onNavigate) {
@@ -85,8 +88,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <>
       {/* Welcome Section */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Welcome back, Admin!</h2>
-        <p className="text-gray-600">Here's what's happening with your procurement today.</p>
+        <h2 className={`text-2xl font-bold ${styles.textPrimary}`}>Welcome back, Admin!</h2>
+        <p className={styles.textSecondary}>Here's what's happening with your procurement today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -98,7 +101,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Quick Actions */}
       <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <h3 className={`text-xl font-semibold ${styles.textPrimary} mb-4`}>Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map(action => (
             <QuickActionCard 
@@ -112,7 +115,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* For Approval Section */}
       <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">For Approval</h3>
+        <h3 className={`text-xl font-semibold ${styles.textPrimary} mb-4`}>For Approval</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {approvalActions.map(action => (
             <QuickActionCard 

@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Package, FileText, ClipboardCheck, CheckCircle, TrendingUp, FileBox, FolderCheck, Handshake, Files } from 'lucide-react';
-import BalanceItemsModal from './BalanceItemsModal'; // Import the modal
+import { Package, FileText, ClipboardCheck, CheckCircle, FileBox, FolderCheck, Handshake, Files } from 'lucide-react';
+import BalanceItemsModal from './BalanceItemsModal';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ReportsMenuProps {
   onNavigate: (nav: string) => void;
 }
 
 export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
-  // State for controlling the Balance Items modal
+  const { styles } = useTheme();
   const [showBalanceModal, setShowBalanceModal] = useState(false);
 
   const reportModules = [
@@ -18,7 +19,16 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       nav: 'reports-balance-items',
       color: 'bg-blue-500',
       hoverColor: 'hover:bg-blue-600',
-      useModal: true // Flag to indicate this uses a modal
+      useModal: true
+    },
+    {
+      title: 'Obligation Slip',
+      description: 'Track and monitor approval status across all processes',
+      icon: <Files size={40} />,
+      nav: 'reports-os',
+      color: 'bg-cyan-500',
+      hoverColor: 'hover:bg-cyan-600',
+      useModal: false
     },
     {
       title: 'Purchase Order',
@@ -27,6 +37,33 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       nav: 'reports-purchase-order',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
+      useModal: false
+    },
+    {
+      title: 'Request for Quotation',
+      description: 'Track and monitor approval status across all processes',
+      icon: <CheckCircle size={40} />,
+      nav: 'reports-rfq',
+      color: 'bg-yellow-500',
+      hoverColor: 'hover:bg-yellow-600',
+      useModal: false
+    },
+    {
+      title: 'Approvals',
+      description: 'Track and monitor approval status across all processes',
+      icon: <FolderCheck size={40} />,
+      nav: 'reports-approvals',
+      color: 'bg-purple-500',
+      hoverColor: 'hover:bg-purple-600',
+      useModal: false
+    },
+    {
+      title: 'Abstract of Bids',
+      description: 'Track and monitor approval status across all processes',
+      icon: <Handshake size={40} />,
+      nav: 'reports-abstract',
+      color: 'bg-indigo-500',
+      hoverColor: 'hover:bg-indigo-600',
       useModal: false
     },
     {
@@ -44,48 +81,47 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       icon: <FileBox size={40} />,
       nav: 'reports-ris',
       color: 'bg-pink-500',
-      hoverColor: 'hover:bg-purple-600',
-      useModal: false
-    },
-    {
-      title: 'Approvals',
-      description: 'Track and monitor approval status across all processes',
-      icon: <FolderCheck size={40} />,
-      nav: 'reports-approvals',
-      color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600',
-      useModal: false
-    },
-    {
-      title: 'Obligation Slip',
-      description: 'Track and monitor approval status across all processes',
-      icon: <Files size={40} />,
-      nav: 'reports-os',
-      color: 'bg-cyan-500',
-      hoverColor: 'hover:bg-purple-600',
-      useModal: false
-    },
-    {
-      title: 'Abstract of Bids',
-      description: 'Track and monitor approval status across all processes',
-      icon: <Handshake size={40} />,
-      nav: 'reports-abstract',
-      color: 'bg-indigo-500',
-      hoverColor: 'hover:bg-purple-600',
-      useModal: false
-    },
-    {
-      title: 'Request for Quotation',
-      description: 'Track and monitor approval status across all processes',
-      icon: <CheckCircle size={40} />,
-      nav: 'reports-ris',
-      color: 'bg-yellow-500',
-      hoverColor: 'hover:bg-purple-600',
+      hoverColor: 'hover:bg-pink-600',
       useModal: false
     },
   ];
 
-  // Handle click based on whether it should open a modal or navigate
+  // Report Summary data
+  const reportSummary = [
+    {
+      label: 'Purchase Request',
+      value: 27,
+      icon: <ClipboardCheck size={32} />,
+      color: 'orange',
+      subtitle: '5 awaiting inspection',
+      onClick: () => onNavigate('reports-approvals')
+    },
+    {
+      label: 'Project Procurement Plan',
+      value: 43,
+      icon: <FileText size={32} />,
+      color: 'green',
+      subtitle: '8 pending approval',
+      onClick: () => onNavigate('project-procurement')
+    },
+    {
+      label: 'Annual Procurement Plan',
+      value: 2,
+      icon: <CheckCircle size={32} />,
+      color: 'purple',
+      subtitle: 'Approval rate this quarter',
+      onClick: () => onNavigate('reports-approvals')
+    },
+    {
+      label: 'Archives',
+      value: 156,
+      icon: <FolderCheck size={32} />,
+      color: 'blue',
+      subtitle: 'Files from previous years',
+      onClick: () => setShowBalanceModal(true)
+    },
+  ];
+
   const handleModuleClick = (module: typeof reportModules[0]) => {
     if (module.useModal && module.nav === 'reports-balance-items') {
       setShowBalanceModal(true);
@@ -98,10 +134,10 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <h1 className={`text-3xl font-bold ${styles.textPrimary} mb-2`}>
           Reports Management
         </h1>
-        <p className="text-gray-600">
+        <p className={styles.textSecondary}>
           Generate and view comprehensive reports for procurement activities
         </p>
       </div>
@@ -114,24 +150,19 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
             onClick={() => handleModuleClick(module)}
             className="block group text-left w-full"
           >
-            <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
-              {/* Icon Header */}
+            <div className={`${styles.bgCard} rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full`}>
               <div className={`${module.color} ${module.hoverColor} p-6 transition-colors flex items-center justify-center`}>
                 <div className="text-white">
                   {module.icon}
                 </div>
               </div>
-
-              {/* Content */}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className={`text-xl font-bold ${styles.textPrimary} mb-2`}>
                   {module.title}
                 </h3>
-                <p className="text-gray-600 mb-4 text-sm">
+                <p className={`${styles.textSecondary} mb-4 text-sm`}>
                   {module.description}
                 </p>
-
-                {/* Action Button */}
                 <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
                   <span>View Report</span>
                   <span className="ml-2">→</span>
@@ -142,159 +173,108 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
         ))}
       </div>
 
-      {/* Quick Stats Section */}
+      {/* Report Summary Section */}
       <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Report Summary</h2>
+        <h2 className={`text-2xl font-bold ${styles.textPrimary} mb-4`}>Report Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div 
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => setShowBalanceModal(true)}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Available Items</p>
-                <p className="text-3xl font-bold text-blue-600">156</p>
+          {reportSummary.map((item, index) => (
+            <button
+              key={index}
+              onClick={item.onClick}
+              className={`${styles.bgCard} rounded-lg shadow p-6 text-left hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`${styles.textSecondary} text-sm`}>{item.label}</p>
+                  <p className={`text-3xl font-bold text-${item.color}-600`}>{item.value}</p>
+                </div>
+                <div className={`text-${item.color}-500 opacity-50`}>
+                  {item.icon}
+                </div>
               </div>
-              <Package size={32} className="text-blue-500 opacity-50" />
-            </div>
-            <div className="mt-2">
-              <span className="text-xs text-green-600 flex items-center">
-                <TrendingUp size={14} className="mr-1" />
-                12% from last month
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Purchase Orders</p>
-                <p className="text-3xl font-bold text-green-600">43</p>
+              <div className="mt-2">
+                <span className={`text-xs ${styles.textSecondary}`}>
+                  {item.subtitle}
+                </span>
               </div>
-              <FileText size={32} className="text-green-500 opacity-50" />
-            </div>
-            <div className="mt-2">
-              <span className="text-xs text-gray-600">
-                8 pending approval
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">IAF Completed</p>
-                <p className="text-3xl font-bold text-orange-600">27</p>
-              </div>
-              <ClipboardCheck size={32} className="text-orange-500 opacity-50" />
-            </div>
-            <div className="mt-2">
-              <span className="text-xs text-gray-600">
-                5 awaiting inspection
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Approvals</p>
-                <p className="text-3xl font-bold text-purple-600">89%</p>
-              </div>
-              <CheckCircle size={32} className="text-purple-500 opacity-50" />
-            </div>
-            <div className="mt-2">
-              <span className="text-xs text-gray-600">
-                Approval rate this quarter
-              </span>
-            </div>
-          </div>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Recent Reports Section */}
       <div className="mt-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Reports Generated</h2>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="divide-y divide-gray-200">
-            <div 
-              className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+        <h2 className={`text-2xl font-bold ${styles.textPrimary} mb-4`}>Recent Reports Generated</h2>
+        <div className={`${styles.bgCard} rounded-lg shadow overflow-hidden`}>
+          <div className={`divide-y ${styles.border}`}>
+            <button 
+              className={`w-full p-4 ${styles.hoverBg} transition-colors text-left`}
               onClick={() => setShowBalanceModal(true)}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <Package size={20} className="text-blue-500 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-800">Q4 Balance Items Report</p>
-                    <p className="text-sm text-gray-600">Complete inventory of available APP items</p>
-                    <p className="text-xs text-gray-500 mt-1">Generated 1 hour ago</p>
+                    <p className={`font-semibold ${styles.textPrimary}`}>Q4 Balance Items Report</p>
+                    <p className={`text-sm ${styles.textSecondary}`}>Complete inventory of available APP items</p>
+                    <p className={`text-xs ${styles.textMuted} mt-1`}>Generated 1 hour ago</p>
                   </div>
                 </div>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Ready</span>
               </div>
-            </div>
+            </button>
 
-            <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+            <button 
+              className={`w-full p-4 ${styles.hoverBg} transition-colors text-left`}
+              onClick={() => onNavigate('reports-purchase-order')}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <FileText size={20} className="text-green-500 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-800">November Purchase Orders</p>
-                    <p className="text-sm text-gray-600">Monthly PO summary and status</p>
-                    <p className="text-xs text-gray-500 mt-1">Generated 3 hours ago</p>
+                    <p className={`font-semibold ${styles.textPrimary}`}>November Purchase Orders</p>
+                    <p className={`text-sm ${styles.textSecondary}`}>Monthly PO summary and status</p>
+                    <p className={`text-xs ${styles.textMuted} mt-1`}>Generated 3 hours ago</p>
                   </div>
                 </div>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Ready</span>
               </div>
-            </div>
+            </button>
 
-            <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+            <button 
+              className={`w-full p-4 ${styles.hoverBg} transition-colors text-left`}
+              onClick={() => onNavigate('reports-inspection-acceptance')}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <ClipboardCheck size={20} className="text-orange-500 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-800">IAF Compliance Report</p>
-                    <p className="text-sm text-gray-600">Inspection and acceptance tracking report</p>
-                    <p className="text-xs text-gray-500 mt-1">Generated yesterday</p>
+                    <p className={`font-semibold ${styles.textPrimary}`}>IAF Compliance Report</p>
+                    <p className={`text-sm ${styles.textSecondary}`}>Inspection and acceptance tracking report</p>
+                    <p className={`text-xs ${styles.textMuted} mt-1`}>Generated yesterday</p>
                   </div>
                 </div>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Ready</span>
               </div>
-            </div>
+            </button>
 
-            <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+            <button 
+              className={`w-full p-4 ${styles.hoverBg} transition-colors text-left`}
+              onClick={() => onNavigate('reports-approvals')}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <CheckCircle size={20} className="text-purple-500 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-800">Approval Pipeline Status</p>
-                    <p className="text-sm text-gray-600">Current approval workflows and bottlenecks</p>
-                    <p className="text-xs text-gray-500 mt-1">Generated 2 days ago</p>
+                    <p className={`font-semibold ${styles.textPrimary}`}>Approval Pipeline Status</p>
+                    <p className={`text-sm ${styles.textSecondary}`}>Current approval workflows and bottlenecks</p>
+                    <p className={`text-xs ${styles.textMuted} mt-1`}>Generated 2 days ago</p>
                   </div>
                 </div>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Ready</span>
               </div>
-            </div>
+            </button>
           </div>
-        </div>
-      </div>
-
-      {/* Export Options */}
-      <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">Export Options</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Export reports in various formats for further analysis and record-keeping
-        </p>
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors text-sm font-medium">
-            Export to PDF
-          </button>
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors text-sm font-medium">
-            Export to Excel
-          </button>
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors text-sm font-medium">
-            Export to CSV
-          </button>
         </div>
       </div>
 

@@ -21,7 +21,7 @@ export interface Activity {
 
 export interface Stat {
   label: string;
-  value: string;
+  value: number | string;
   change: string;
   trend: 'up' | 'down' | 'neutral';
 }

@@ -16,6 +16,7 @@ export const MONTHS: Month[] = [
 ];
 
 export const INITIAL_PPMP_ITEM: Omit<PPMPItem, 'id'> = {
+  category: 'COMMON USED SUPPLIES',
   generalDescription: '',
   unit: '',
   qtySize: '',
