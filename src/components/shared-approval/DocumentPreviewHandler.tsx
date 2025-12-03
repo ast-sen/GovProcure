@@ -206,6 +206,8 @@ export function DocumentPreviewHandler({
               name: '',
               designation: '',
             },
+            officeAgency: item.department,
+            transactionNumber: item.transactionNumber,
           }}
           items={[]}
         />
