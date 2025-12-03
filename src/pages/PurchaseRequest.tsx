@@ -7,6 +7,7 @@ import { HistoryModal } from '../components/ui/HistoryModal';
 import { usePurchaseRequest } from '../hooks/usePurchaseRequest';
 import { PurchaseRequestProps } from '../types/purchase-request.types';
 import { useTheme } from '../context/ThemeContext';
+import SaveDraftModal from '../components/ui/SaveDraftModal';
 
 export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) => {
   const { styles } = useTheme();
@@ -28,7 +29,8 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
     handlePreview,
     handleDownloadPDF,
     successModal,
-    historyModal
+    historyModal,
+    saveDraftModal 
   } = usePurchaseRequest();
 
   return (
@@ -80,6 +82,15 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
         onClose={historyModal.onClose}
         items={historyModal.items}
         onSelectItem={historyModal.onSelectItem}
+      />
+      <SaveDraftModal
+        isOpen={saveDraftModal.isOpen}
+        onClose={saveDraftModal.close}
+        onSave={saveDraftModal.onSave}
+        isLoading={saveDraftModal.isLoading}
+        docType="PR"
+        office={formData.officeAgency}
+        transactionNumber={formData.transactionNumber}
       />
     </div>
   );

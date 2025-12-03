@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Package, FileText, ClipboardCheck, CheckCircle, FileBox, FolderCheck, Handshake, Files } from 'lucide-react';
-import BalanceItemsModal from './BalanceItemsModal';
+import BalanceItemsModal from '../../components/ui/balanceModal/BalanceItemsModal';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ReportsMenuProps {
@@ -94,7 +94,7 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       icon: <ClipboardCheck size={32} />,
       color: 'orange',
       subtitle: '5 awaiting inspection',
-      onClick: () => onNavigate('reports-approvals')
+      onClick: () => onNavigate('reports-pr')
     },
     {
       label: 'Project Procurement Plan',
@@ -102,7 +102,7 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       icon: <FileText size={32} />,
       color: 'green',
       subtitle: '8 pending approval',
-      onClick: () => onNavigate('project-procurement')
+      onClick: () => onNavigate('reports-ppmp')
     },
     {
       label: 'Annual Procurement Plan',
@@ -110,7 +110,7 @@ export const ReportsMenu = ({ onNavigate }: ReportsMenuProps) => {
       icon: <CheckCircle size={32} />,
       color: 'purple',
       subtitle: 'Approval rate this quarter',
-      onClick: () => onNavigate('reports-approvals')
+      onClick: () => onNavigate('reports-app')
     },
     {
       label: 'Archives',

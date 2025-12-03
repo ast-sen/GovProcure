@@ -17,6 +17,8 @@ import ApprovalTable from '../components/shared-approval/ApprovalTable';
 import ApprovalDetailModal from '../components/shared-approval/ApprovalDetailModal';
 import ApprovalConfirmModal from '../components/shared-approval/ApprovalConfirmModal';
 import ApprovalRemarksModal from '../components/shared-approval/ApprovalRemarksModal';
+import DocumentPreviewHandler from '../components/shared-approval/DocumentPreviewHandler';
+
 import { MBOItem } from '../types/approval.types';
 import { MBOTypeFilter } from '../types/approval.types';
 import { ExtendedStatusFilter } from '../types/approval.types';
@@ -48,6 +50,7 @@ export const MBOApprovalScreen = ({ onNavigate }: MBOApprovalScreenProps) => {
   const { styles, themeColors } = useTheme();
   const [items, setItems] = useState<MBOItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const {
     searchTerm, setSearchTerm,
@@ -96,6 +99,16 @@ export const MBOApprovalScreen = ({ onNavigate }: MBOApprovalScreenProps) => {
     };
     loadData();
   }, []);
+
+  const handleReview = () => {
+    setShowDetailModal(false);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReview = () => {
+    setShowReviewModal(false);
+    setShowDetailModal(true);
+  };
 
   const statusCounts = {
     draft: items.filter(i => i.status === 'Draft').length,
@@ -205,7 +218,7 @@ export const MBOApprovalScreen = ({ onNavigate }: MBOApprovalScreenProps) => {
         onClose={() => setShowDetailModal(false)}
         onApprove={() => handleAction('approve')}
         onReject={() => handleAction('reject')}
-        onReview={() => ""}
+        onReview={handleReview}
         onViewRemarks={() => {
           setShowDetailModal(false);
           setShowRemarksModal(true);
@@ -237,6 +250,13 @@ export const MBOApprovalScreen = ({ onNavigate }: MBOApprovalScreenProps) => {
           setShowRemarksModal(false);
           setShowDetailModal(true);
         }}
+      />
+
+      {/* Document Preview Handler */}
+      <DocumentPreviewHandler
+        isOpen={showReviewModal}
+        onClose={handleCloseReview}
+        item={selectedItem}
       />
     </div>
   );

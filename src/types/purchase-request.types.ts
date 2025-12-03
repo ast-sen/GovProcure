@@ -22,6 +22,8 @@ export interface PRFormData {
   purpose: string;
   requestedBy: PRSignatory;
   approvedBy: PRSignatory;
+  officeAgency: string;
+  transactionNumber: string;
 }
 
 export interface PurchaseRequestProps {

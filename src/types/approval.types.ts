@@ -16,6 +16,7 @@ export interface Remark {
 }
 
 export interface BaseApprovalItem {
+  status: string;
   id: number;
   type: DocumentType;
   transactionNumber: string;

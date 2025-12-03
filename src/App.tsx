@@ -15,6 +15,7 @@ import ObligationSlip from './pages/reports/ObligationSlip';
 import RequestForPriceQuotation from './pages/reports/RequestForPriceQuotation';
 import MBOApprovalScreen from './pages/MBOApprovalScreen';
 import { AdminDashboard } from './pages/settings/AdminManagementScreen';
+import AnnualProcurementPlan from './pages/reports/AnnualProcurementPlan';
 
 function App() {
   const [activeNav, setActiveNav] = useState('dashboard');
@@ -47,6 +48,8 @@ function App() {
         return <RequestForPriceQuotation onNavigate={setActiveNav} />;
       case 'reports':
         return <ReportsMenu onNavigate={setActiveNav} />;
+      case 'reports-app':
+        return <AnnualProcurementPlan onNavigate={setActiveNav} />;
       case 'settings':
         return <SettingsScreen onNavigate={setActiveNav} />;
       case 'admin-login':
