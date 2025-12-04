@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { POFormHeader } from './POFormHeader';
 import { POItemsTable } from './POItemsTable';
 import { POSignatures } from './POSignatures';
-import { FormActions } from '../shared/FormActions';
+import { ReportFormActions } from '../shared/ReportFormActions.tsx';
 import { POItem, POFormData, PurchaseOrderProps } from '../../../types/purchase-order.types';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -12,13 +12,15 @@ interface POFormProps extends PurchaseOrderProps {
   items: POItem[];
   onUpdateFormData: (updates: Partial<POFormData>) => void;
   onUpdateItem: (id: string, field: 'unitCost' | 'amount', value: string) => void;
-  onSubmit: () => void;
+  onUpdate: () => void;  // Changed from onSubmit
   onPrint: () => void;
   onPreview: () => void;
   onDownloadPDF: () => void;
+  onViewApproved: () => void;  // Changed from onViewHistory
   calculateTotal: () => string;
   calculatePenalty: () => string;
   isGenerating?: boolean;
+  isUpdating?: boolean;  // New loading state
 }
 
 export const POForm: React.FC<POFormProps> = ({
@@ -27,13 +29,15 @@ export const POForm: React.FC<POFormProps> = ({
   onNavigate,
   onUpdateFormData,
   onUpdateItem,
-  onSubmit,
+  onUpdate,
   onPrint,
   onPreview,
   onDownloadPDF,
+  onViewApproved,
   calculateTotal,
   calculatePenalty,
-  isGenerating = false
+  isGenerating = false,
+  isUpdating = false
 }) => {
   const { styles, darkMode } = useTheme();
 
@@ -89,17 +93,16 @@ export const POForm: React.FC<POFormProps> = ({
             <p className={`${styles.textSecondary} mt-1`}>ANNEX G-5</p>
           </div>
         </div>
-        <FormActions
-          onSave={onSubmit}
+        <ReportFormActions
+          onUpdate={onUpdate}
           onPrint={onPrint}
           onPreview={onPreview}
           onDownloadPDF={onDownloadPDF}
-          saveLabel="Save Order"
-          isLoading={isGenerating} onSubmit={function (): void {
-            throw new Error('Function not implemented.');
-          } } onViewHistory={function (): void {
-            throw new Error('Function not implemented.');
-          } }        />
+          onViewApproved={onViewApproved}
+          updateLabel="Update Order"
+          isLoading={isGenerating}
+          isUpdating={isUpdating}
+        />
       </div>
 
       <div className={`${styles.bgCard} rounded-lg shadow-lg max-w-7xl mx-auto border ${styles.border}`}>

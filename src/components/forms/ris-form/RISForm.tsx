@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { RISFormHeader } from './RISFormHeader';
 import { RISItemsTable } from './RISItemsTable';
 import { RISSignatureSection } from './RISSignatureSection';
-import { FormActions } from '../shared/FormActions';
+import { ReportFormActions } from '../shared/ReportFormActions.tsx';
 import { RISItem, RISFormData, RISProps } from '../../../types/ris.types';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -11,13 +11,13 @@ interface RISFormProps extends RISProps {
   formData: RISFormData;
   items: RISItem[];
   onUpdateFormData: (updates: Partial<RISFormData>) => void;
-  onSubmit: () => void;
-  onSubmitForApproval: () => void;
+  onUpdate: () => void;  // Changed from onSubmit
   onPrint: () => void;
   onPreview: () => void;
   onDownloadPDF: () => void;
-  onViewHistory: () => void;
+  onViewApproved: () => void;  // Changed from onViewHistory
   isGenerating?: boolean;
+  isUpdating?: boolean;  // New loading state for update
 }
 
 export const RISForm: React.FC<RISFormProps> = ({
@@ -25,13 +25,13 @@ export const RISForm: React.FC<RISFormProps> = ({
   items,
   onNavigate,
   onUpdateFormData,
-  onSubmit,
-  onSubmitForApproval,
+  onUpdate,
   onPrint,
   onPreview,
   onDownloadPDF,
-  onViewHistory,
-  isGenerating = false
+  onViewApproved,
+  isGenerating = false,
+  isUpdating = false
 }) => {
   const { styles, darkMode } = useTheme();
 
@@ -56,15 +56,15 @@ export const RISForm: React.FC<RISFormProps> = ({
           </div>
         </div>
         
-        <FormActions
-          onSave={onSubmit}
-          onSubmit={onSubmitForApproval}
+        <ReportFormActions
+          onUpdate={onUpdate}
           onPrint={onPrint}
           onPreview={onPreview}
           onDownloadPDF={onDownloadPDF}
-          onViewHistory={onViewHistory}
-          saveLabel="Save"
+          onViewApproved={onViewApproved}
+          updateLabel="Update"
           isLoading={isGenerating}
+          isUpdating={isUpdating}
         />
       </div>
 

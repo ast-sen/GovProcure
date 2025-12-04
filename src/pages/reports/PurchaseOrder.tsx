@@ -2,6 +2,8 @@ import React from 'react';
 import { POForm } from '../../components/forms/po-form/POForm';
 import { POPreviewModal } from '../../components/templates/purchase-order-temp/POPreviewModal';
 import { POPrintTemplate } from '../../components/templates/purchase-order-temp/POPrintTemplate';
+import { SuccessModal } from '../../components/ui/SuccessModal';
+import { ApprovedFormsModal } from '../../components/ui/ApprovedFormsModal';
 import { usePurchaseOrder } from '../../hooks/usePurchaseOrder';
 import { PurchaseOrderProps } from '../../types/purchase-order.types';
 import { useTheme } from '../../context/ThemeContext';
@@ -14,15 +16,18 @@ export const PurchaseOrder: React.FC<PurchaseOrderProps> = ({ onNavigate }) => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateItem,
     updateFormData,
     calculateTotal,
     calculatePenalty,
-    handleSave,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
+    successModal,
+    approvedModal
   } = usePurchaseOrder();
 
   return (
@@ -33,13 +38,15 @@ export const PurchaseOrder: React.FC<PurchaseOrderProps> = ({ onNavigate }) => {
         onNavigate={onNavigate}
         onUpdateFormData={updateFormData}
         onUpdateItem={updateItem}
-        onSubmit={handleSave}
+        onUpdate={handleUpdate}
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
+        onViewApproved={approvedModal.onViewApproved}
         calculateTotal={calculateTotal}
         calculatePenalty={calculatePenalty}
         isGenerating={isGenerating}
+        isUpdating={isUpdating}
       />
       
       {showPreview && (
@@ -57,6 +64,21 @@ export const PurchaseOrder: React.FC<PurchaseOrderProps> = ({ onNavigate }) => {
         formData={formData}
         items={items}
         total={calculateTotal()}
+      />
+      
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        onClose={successModal.onClose}
+        title={successModal.title}
+        message={successModal.message}
+      />
+      
+      <ApprovedFormsModal
+        isOpen={approvedModal.isOpen}
+        onClose={approvedModal.onClose}
+        items={approvedModal.items}
+        onSelectItem={approvedModal.onSelectItem}
+        formTypeLabel="Purchase Order"
       />
     </div>
   );

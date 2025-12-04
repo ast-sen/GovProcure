@@ -3,7 +3,7 @@ import { RISForm } from '../../components/forms/ris-form/RISForm';
 import { RISPreviewModal } from '../../components/templates/ris-temp/RISPreviewModal';
 import { RISPrintTemplate } from '../../components/templates/ris-temp/RISPrintTemplate';
 import { SuccessModal } from '../../components/ui/SuccessModal';
-import { HistoryModal } from '../../components/ui/HistoryModal';
+import { ApprovedFormsModal } from '../../components/ui/ApprovedFormsModal';
 import { useRIS } from '../../hooks/useRIS';
 import { RISProps } from '../../types/ris.types';
 
@@ -13,15 +13,15 @@ export const RequisitionIssueSlip: React.FC<RISProps> = ({ onNavigate }) => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
     successModal,
-    historyModal
+    approvedModal
   } = useRIS();
 
   return (
@@ -59,13 +59,13 @@ export const RequisitionIssueSlip: React.FC<RISProps> = ({ onNavigate }) => {
         items={items}
         onNavigate={onNavigate}
         onUpdateFormData={updateFormData}
-        onSubmit={handleSaveDraft}
-        onSubmitForApproval={handleSubmitForApproval}
+        onUpdate={handleUpdate}
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
-        onViewHistory={historyModal.onViewHistory}
+        onViewApproved={approvedModal.onViewApproved}
         isGenerating={isGenerating}
+        isUpdating={isUpdating}
       />
       
       {showPreview && (
@@ -89,11 +89,12 @@ export const RequisitionIssueSlip: React.FC<RISProps> = ({ onNavigate }) => {
         message={successModal.message}
       />
       
-      <HistoryModal
-        isOpen={historyModal.isOpen}
-        onClose={historyModal.onClose}
-        items={historyModal.items}
-        onSelectItem={historyModal.onSelectItem}
+      <ApprovedFormsModal
+        isOpen={approvedModal.isOpen}
+        onClose={approvedModal.onClose}
+        items={approvedModal.items}
+        onSelectItem={approvedModal.onSelectItem}
+        formTypeLabel="Requisition & Issue Slip"
       />
     </>
   );

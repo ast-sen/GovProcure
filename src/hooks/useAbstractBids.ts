@@ -1,9 +1,6 @@
-// hooks/useAbstractBids.ts
-
 import { useState } from 'react';
 import { AbstractBidsFormData, AbstractBidsItem, DEFAULT_ABSTRACT_BIDS_FORM_DATA } from '../types/abstract-bids.types';
-import { useSuccessModal } from './ui-hooks/useSuccessModal';
-import { useFormHistory } from './ui-hooks/useFormHistory';
+import { ApprovedFormItem } from '../components/ui/ApprovedFormsModal';
 
 export const useAbstractBids = () => {
   const [formData, setFormData] = useState<AbstractBidsFormData>(DEFAULT_ABSTRACT_BIDS_FORM_DATA);
@@ -33,30 +30,122 @@ export const useAbstractBids = () => {
   
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showApprovedModal, setShowApprovedModal] = useState(false);
 
-  const successModal = useSuccessModal();
-  const historyModal = useFormHistory('abstract-bids');
+  // Mock approved forms data - Replace with API call
+  const [approvedForms] = useState<ApprovedFormItem[]>([
+    {
+      id: 'ab-1',
+      formNumber: 'AB-2024-001',
+      title: 'Construction Materials Bidding',
+      dateApproved: '2024-11-08',
+      approvedBy: 'John Doe',
+      department: 'Engineering'
+    },
+    {
+      id: 'ab-2',
+      formNumber: 'AB-2024-002',
+      title: 'IT Equipment Procurement',
+      dateApproved: '2024-11-15',
+      approvedBy: 'Jane Smith',
+      department: 'IT'
+    },
+    {
+      id: 'ab-3',
+      formNumber: 'AB-2024-003',
+      title: 'Office Furniture Supply',
+      dateApproved: '2024-11-22',
+      approvedBy: 'John Doe',
+      department: 'Admin'
+    }
+  ]);
+
+  const [successModal, setSuccessModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   const updateFormData = (updates: Partial<AbstractBidsFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleSaveDraft = () => {
-    console.log('Saving Abstract of Bids draft...', formData);
-    // TODO: Implement API call to save draft
-    successModal.showSuccess(
-      'Your Abstract of Bids has been saved as draft.',
-      'Draft Saved'
-    );
+  // Changed from handleSaveDraft to handleUpdate
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      console.log('Updating approved Abstract of Bids...', formData);
+      
+      // TODO: Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // const response = await fetch('/api/abstract-bids/update', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ formData, items })
+      // });
+      
+      // if (!response.ok) throw new Error('Update failed');
+      
+      setSuccessModal({
+        isOpen: true,
+        title: 'Abstract of Bids Updated',
+        message: 'Your Abstract of Bids has been updated successfully.'
+      });
+    } catch (error) {
+      console.error('Error updating Abstract of Bids:', error);
+      setSuccessModal({
+        isOpen: true,
+        title: 'Update Failed',
+        message: 'Failed to update the Abstract of Bids. Please try again.'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleSubmitForApproval = () => {
-    console.log('Submitting Abstract of Bids for approval...', formData);
-    // TODO: Implement API call to submit for approval
-    successModal.showSuccess(
-      'Your Abstract of Bids has been submitted for approval.',
-      'Submitted Successfully'
-    );
+  // Load an approved form when selected from the modal
+  const handleSelectApprovedForm = async (form: ApprovedFormItem) => {
+    try {
+      console.log('Loading approved form:', form);
+      
+      // TODO: Replace with actual API call to fetch full form data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // const response = await fetch(`/api/abstract-bids/approved/${form.id}`);
+      // if (!response.ok) throw new Error('Failed to load form');
+      // const fullData = await response.json();
+      
+      // Mock loading form data
+      setFormData({
+        ...DEFAULT_ABSTRACT_BIDS_FORM_DATA,
+        openedOn: form.dateApproved,
+        openedAt: form.department || '',
+        openedAtTime: '10:00 AM',
+        forFurnishing: form.title,
+        forOffice: form.department || '',
+        awardRecommendedTo: form.supplier || ''
+      });
+      
+      // You would also load the items and bidders from the API
+      // setItems(fullData.items);
+      
+      setShowApprovedModal(false);
+      
+      setSuccessModal({
+        isOpen: true,
+        title: 'Form Loaded',
+        message: `Successfully loaded ${form.formNumber}`
+      });
+    } catch (error) {
+      console.error('Error loading approved form:', error);
+      setSuccessModal({
+        isOpen: true,
+        title: 'Load Failed',
+        message: 'Failed to load the approved form. Please try again.'
+      });
+    }
   };
 
   const handlePrint = () => {
@@ -190,7 +279,11 @@ export const useAbstractBids = () => {
           await writable.write(pdfBlob);
           await writable.close();
 
-          successModal.showSuccess('Your PDF has been saved successfully!', 'PDF Saved');
+          setSuccessModal({
+            isOpen: true,
+            title: 'PDF Saved',
+            message: 'Your PDF has been saved successfully!'
+          });
         } catch (err: any) {
           if (err.name !== 'AbortError') {
             throw err;
@@ -204,7 +297,11 @@ export const useAbstractBids = () => {
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 100);
 
-        successModal.showSuccess('Your PDF has been downloaded successfully!', 'PDF Generated');
+        setSuccessModal({
+          isOpen: true,
+          title: 'PDF Generated',
+          message: 'Your PDF has been downloaded successfully!'
+        });
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -220,25 +317,25 @@ export const useAbstractBids = () => {
     bidderNames,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
     successModal: {
       isOpen: successModal.isOpen,
-      onClose: successModal.closeModal,
-      title: successModal.modalTitle,
-      message: successModal.modalMessage
+      onClose: () => setSuccessModal(prev => ({ ...prev, isOpen: false })),
+      title: successModal.title,
+      message: successModal.message
     },
-    historyModal: {
-      isOpen: historyModal.showHistoryModal,
-      onClose: historyModal.handleCloseHistory,
-      items: historyModal.historyItems,
-      onViewHistory: historyModal.handleViewHistory,
-      onSelectItem: historyModal.handleSelectItem
+    approvedModal: {
+      isOpen: showApprovedModal,
+      onClose: () => setShowApprovedModal(false),
+      onViewApproved: () => setShowApprovedModal(true),
+      items: approvedForms,
+      onSelectItem: handleSelectApprovedForm
     }
   };
 };

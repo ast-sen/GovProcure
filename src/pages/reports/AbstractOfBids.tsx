@@ -3,7 +3,7 @@ import { AbstractBidsForm } from '../../components/forms/abstract-bids-form/Abst
 import { AbstractBidsPreviewModal } from '../../components/templates/abstract-bids-temp/AbstractBidsPreviewModal';
 import { AbstractBidsPrintTemplate } from '../../components/templates/abstract-bids-temp/AbstractBidsPrintTemplate';
 import { SuccessModal } from '../../components/ui/SuccessModal';
-import { HistoryModal } from '../../components/ui/HistoryModal';
+import { ApprovedFormsModal } from '../../components/ui/ApprovedFormsModal';
 import { useAbstractBids } from '../../hooks/useAbstractBids';
 import { AbstractBidsProps } from '../../types/abstract-bids.types';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,15 +17,15 @@ export const AbstractOfBids: React.FC<AbstractBidsProps> = ({ onNavigate }) => {
     bidderNames,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
     successModal,
-    historyModal
+    approvedModal
   } = useAbstractBids();
 
   return (
@@ -64,13 +64,13 @@ export const AbstractOfBids: React.FC<AbstractBidsProps> = ({ onNavigate }) => {
         bidderNames={bidderNames}
         onNavigate={onNavigate}
         onUpdateFormData={updateFormData}
-        onSubmit={handleSaveDraft}
-        onSubmitForApproval={handleSubmitForApproval}
+        onUpdate={handleUpdate}
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
-        onViewHistory={historyModal.onViewHistory}
+        onViewApproved={approvedModal.onViewApproved}
         isGenerating={isGenerating}
+        isUpdating={isUpdating}
       />
       
       {showPreview && (
@@ -96,11 +96,12 @@ export const AbstractOfBids: React.FC<AbstractBidsProps> = ({ onNavigate }) => {
         message={successModal.message}
       />
       
-      <HistoryModal
-        isOpen={historyModal.isOpen}
-        onClose={historyModal.onClose}
-        items={historyModal.items}
-        onSelectItem={historyModal.onSelectItem}
+      <ApprovedFormsModal
+        isOpen={approvedModal.isOpen}
+        onClose={approvedModal.onClose}
+        items={approvedModal.items}
+        onSelectItem={approvedModal.onSelectItem}
+        formTypeLabel="Abstract of Bids"
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { POItem, POFormData } from '../types/purchase-order.types';
+import { ApprovedFormItem } from '../components/ui/ApprovedFormsModal';
 
 export const usePurchaseOrder = () => {
   const [items, setItems] = useState<POItem[]>([
@@ -44,6 +45,45 @@ export const usePurchaseOrder = () => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showApprovedModal, setShowApprovedModal] = useState(false);
+
+  // Mock approved forms data - Replace with API call
+  const [approvedForms] = useState<ApprovedFormItem[]>([
+    {
+      id: 'po-1',
+      formNumber: 'PO-2024-001',
+      title: 'Office Supplies Purchase',
+      dateApproved: '2024-11-15',
+      approvedBy: 'John Doe',
+      amount: 25000,
+      supplier: 'ABC Office Supplies Inc.'
+    },
+    {
+      id: 'po-2',
+      formNumber: 'PO-2024-002',
+      title: 'IT Equipment Purchase',
+      dateApproved: '2024-11-20',
+      approvedBy: 'Jane Smith',
+      amount: 150000,
+      supplier: 'Tech Solutions Corp.'
+    },
+    {
+      id: 'po-3',
+      formNumber: 'PO-2024-003',
+      title: 'Furniture and Fixtures',
+      dateApproved: '2024-11-25',
+      approvedBy: 'John Doe',
+      amount: 85000,
+      supplier: 'Modern Office Furniture'
+    }
+  ]);
+
+  const [successModal, setSuccessModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   const updateFormData = (updates: Partial<POFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -81,11 +121,84 @@ export const usePurchaseOrder = () => {
     return (total * 0.001).toFixed(2);
   };
 
-  const handleSave = () => {
-    console.log('Form Data:', formData);
-    console.log('Items:', items);
-    console.log('Total:', calculateTotal());
-    alert('Purchase Order saved successfully!');
+  // Changed from handleSave to handleUpdate
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      console.log('Updating approved Purchase Order...');
+      console.log('Form Data:', formData);
+      console.log('Items:', items);
+      console.log('Total:', calculateTotal());
+      
+      // TODO: Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // const response = await fetch('/api/purchase-orders/update', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ formData, items })
+      // });
+      
+      // if (!response.ok) throw new Error('Update failed');
+      
+      setSuccessModal({
+        isOpen: true,
+        title: 'Purchase Order Updated',
+        message: 'Your Purchase Order has been updated successfully.'
+      });
+    } catch (error) {
+      console.error('Error updating Purchase Order:', error);
+      setSuccessModal({
+        isOpen: true,
+        title: 'Update Failed',
+        message: 'Failed to update the Purchase Order. Please try again.'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Load an approved form when selected from the modal
+  const handleSelectApprovedForm = async (form: ApprovedFormItem) => {
+    try {
+      console.log('Loading approved form:', form);
+      
+      // TODO: Replace with actual API call to fetch full form data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // const response = await fetch(`/api/purchase-orders/approved/${form.id}`);
+      // if (!response.ok) throw new Error('Failed to load form');
+      // const fullData = await response.json();
+      
+      // Mock loading form data
+      setFormData({
+        supplierAddress: form.supplier || '',
+        gentlemen: form.supplier || '',
+        placeOfDelivery: 'KADINGILAN, BUKIDNON',
+        dateOfDelivery: form.dateApproved,
+        deliveryTerm: '30 days',
+        paymentTerm: 'Net 30',
+        conformeDate: form.dateApproved
+      });
+      
+      // You would also load the items from the API
+      // setItems(fullData.items);
+      
+      setShowApprovedModal(false);
+      
+      setSuccessModal({
+        isOpen: true,
+        title: 'Form Loaded',
+        message: `Successfully loaded ${form.formNumber}`
+      });
+    } catch (error) {
+      console.error('Error loading approved form:', error);
+      setSuccessModal({
+        isOpen: true,
+        title: 'Load Failed',
+        message: 'Failed to load the approved form. Please try again.'
+      });
+    }
   };
 
   const handlePrint = () => {
@@ -239,7 +352,11 @@ export const usePurchaseOrder = () => {
           await writable.write(pdfBlob);
           await writable.close();
           
-          alert('PDF saved successfully!');
+          setSuccessModal({
+            isOpen: true,
+            title: 'PDF Saved',
+            message: 'Your PDF has been saved successfully!'
+          });
         } catch (err: any) {
           if (err.name !== 'AbortError') {
             throw err;
@@ -253,7 +370,11 @@ export const usePurchaseOrder = () => {
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 100);
         
-        alert('PDF generated successfully!');
+        setSuccessModal({
+          isOpen: true,
+          title: 'PDF Generated',
+          message: 'Your PDF has been downloaded successfully!'
+        });
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -272,14 +393,28 @@ export const usePurchaseOrder = () => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateItem,
     updateFormData,
     calculateTotal,
     calculatePenalty,
-    handleSave,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
+    successModal: {
+      isOpen: successModal.isOpen,
+      onClose: () => setSuccessModal(prev => ({ ...prev, isOpen: false })),
+      title: successModal.title,
+      message: successModal.message
+    },
+    approvedModal: {
+      isOpen: showApprovedModal,
+      onClose: () => setShowApprovedModal(false),
+      onViewApproved: () => setShowApprovedModal(true),
+      items: approvedForms,
+      onSelectItem: handleSelectApprovedForm
+    }
   };
 };

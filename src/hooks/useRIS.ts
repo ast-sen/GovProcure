@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { RISFormData, RISItem, DEFAULT_RIS_FORM_DATA } from '../types/ris.types';
 import { useSuccessModal } from './ui-hooks/useSuccessModal';
-import { useFormHistory } from './ui-hooks/useFormHistory';
+import { ApprovedFormItem } from '../components/ui/ApprovedFormsModal';
 
 export const useRIS = () => {
   const [formData, setFormData] = useState<RISFormData>(DEFAULT_RIS_FORM_DATA);
@@ -41,30 +41,117 @@ export const useRIS = () => {
   ]);
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showApprovedModal, setShowApprovedModal] = useState(false);
+
+  // Mock approved forms data - Replace with API call
+  const [approvedForms] = useState<ApprovedFormItem[]>([
+    {
+      id: 'ris-1',
+      formNumber: 'RIS-2024-001',
+      title: 'Office Supplies Request - Finance Department',
+      dateApproved: '2024-11-15',
+      approvedBy: 'John Doe',
+      department: 'Finance'
+    },
+    {
+      id: 'ris-2',
+      formNumber: 'RIS-2024-002',
+      title: 'IT Equipment Request',
+      dateApproved: '2024-11-20',
+      approvedBy: 'Jane Smith',
+      department: 'IT'
+    },
+    {
+      id: 'ris-3',
+      formNumber: 'RIS-2024-003',
+      title: 'Stationery Items - HR Department',
+      dateApproved: '2024-11-25',
+      approvedBy: 'John Doe',
+      department: 'HR'
+    }
+  ]);
 
   const successModal = useSuccessModal();
-  const historyModal = useFormHistory('ris'); // Pass 'ris' as formType
 
   const updateFormData = (updates: Partial<RISFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleSaveDraft = () => {
-    console.log('Saving RIS draft...', formData);
-    // TODO: Implement API call to save draft
-    successModal.showSuccess(
-      'Your Requisition & Issue Slip has been saved as draft.',
-      'Draft Saved'
-    );
+  // Changed from handleSaveDraft to handleUpdate
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      console.log('Updating approved RIS...', formData);
+      
+      // TODO: Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // const response = await fetch('/api/ris/update', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ formData, items })
+      // });
+      
+      // if (!response.ok) throw new Error('Update failed');
+      
+      successModal.showSuccess(
+        'Your Requisition & Issue Slip has been updated successfully.',
+        'RIS Updated'
+      );
+    } catch (error) {
+      console.error('Error updating RIS:', error);
+      successModal.showSuccess(
+        'Failed to update the RIS. Please try again.',
+        'Update Failed'
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleSubmitForApproval = () => {
-    console.log('Submitting RIS for approval...', formData);
-    // TODO: Implement API call to submit for approval
-    successModal.showSuccess(
-      'Your Requisition & Issue Slip has been submitted for approval.',
-      'Submitted Successfully'
-    );
+  // Load an approved form when selected from the modal
+  const handleSelectApprovedForm = async (form: ApprovedFormItem) => {
+    try {
+      console.log('Loading approved form:', form);
+      
+      // TODO: Replace with actual API call to fetch full form data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // const response = await fetch(`/api/ris/approved/${form.id}`);
+      // if (!response.ok) throw new Error('Failed to load form');
+      // const fullData = await response.json();
+      
+      // Mock loading form data
+      setFormData({
+        ...DEFAULT_RIS_FORM_DATA,
+        office: form.department || '',
+        reference: '',
+        fund: '01',
+        risNo: form.formNumber,
+        date: form.dateApproved,
+        purpose: form.title,
+        approvedBy: {
+          signature: '',
+          name: form.approvedBy,
+          position: 'Department Head',
+          date: form.dateApproved
+        }
+      });
+      
+      setShowApprovedModal(false);
+      
+      successModal.showSuccess(
+        `Successfully loaded ${form.formNumber}`,
+        'Form Loaded'
+      );
+    } catch (error) {
+      console.error('Error loading approved form:', error);
+      successModal.showSuccess(
+        'Failed to load the approved form. Please try again.',
+        'Load Failed'
+      );
+    }
   };
 
   const handlePrint = () => {
@@ -233,10 +320,10 @@ export const useRIS = () => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
@@ -246,12 +333,12 @@ export const useRIS = () => {
       title: successModal.modalTitle,
       message: successModal.modalMessage
     },
-    historyModal: {
-      isOpen: historyModal.showHistoryModal,
-      onClose: historyModal.handleCloseHistory,
-      items: historyModal.historyItems,
-      onViewHistory: historyModal.handleViewHistory,
-      onSelectItem: historyModal.handleSelectItem
+    approvedModal: {
+      isOpen: showApprovedModal,
+      onClose: () => setShowApprovedModal(false),
+      onViewApproved: () => setShowApprovedModal(true),
+      items: approvedForms,
+      onSelectItem: handleSelectApprovedForm
     }
   };
 };

@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { AbstractBidsFormHeader } from './AbstractBidsFormHeader';
 import { AbstractBidsItemsTable } from './AbstractBidsItemsTable';
 import { AbstractBidsSignatureSection } from './AbstractBidsSignatureSection';
-import { FormActions } from '../shared/FormActions';
+import { ReportFormActions } from '../shared/ReportFormActions.tsx';
 import { AbstractBidsItem, AbstractBidsFormData, AbstractBidsProps } from '../../../types/abstract-bids.types';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -12,13 +12,13 @@ interface AbstractBidsFormProps extends AbstractBidsProps {
   items: AbstractBidsItem[];
   bidderNames: string[];
   onUpdateFormData: (updates: Partial<AbstractBidsFormData>) => void;
-  onSubmit: () => void;
-  onSubmitForApproval: () => void;
+  onUpdate: () => void;  // Changed from onSubmit
   onPrint: () => void;
   onPreview: () => void;
   onDownloadPDF: () => void;
-  onViewHistory: () => void;
+  onViewApproved: () => void;  // Changed from onViewHistory
   isGenerating?: boolean;
+  isUpdating?: boolean;  // New loading state
 }
 
 export const AbstractBidsForm: React.FC<AbstractBidsFormProps> = ({
@@ -27,13 +27,13 @@ export const AbstractBidsForm: React.FC<AbstractBidsFormProps> = ({
   bidderNames,
   onNavigate,
   onUpdateFormData,
-  onSubmit,
-  onSubmitForApproval,
+  onUpdate,
   onPrint,
   onPreview,
   onDownloadPDF,
-  onViewHistory,
-  isGenerating = false
+  onViewApproved,
+  isGenerating = false,
+  isUpdating = false
 }) => {
   const { styles, darkMode } = useTheme();
 
@@ -58,15 +58,15 @@ export const AbstractBidsForm: React.FC<AbstractBidsFormProps> = ({
           </div>
         </div>
         
-        <FormActions
-          onSave={onSubmit}
-          onSubmit={onSubmitForApproval}
+        <ReportFormActions
+          onUpdate={onUpdate}
           onPrint={onPrint}
           onPreview={onPreview}
           onDownloadPDF={onDownloadPDF}
-          onViewHistory={onViewHistory}
-          saveLabel="Save"
+          onViewApproved={onViewApproved}
+          updateLabel="Update"
           isLoading={isGenerating}
+          isUpdating={isUpdating}
         />
       </div>
 
