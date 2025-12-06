@@ -3,7 +3,7 @@ import { APPForm } from '../../components/forms/app-form/APPForm';
 import { APPPreviewModal } from '../../components/templates/app-temp/APPPreviewModal';
 import { APPPrintTemplate } from '../../components/templates/app-temp/APPPrintTemplate';
 import { SuccessModal } from '../../components/ui/SuccessModal';
-import { HistoryModal } from '../../components/ui/HistoryModal';
+import { ApprovedFormsModal } from '../../components/ui/ApprovedFormsModal';
 import { useAPP } from '../../hooks/useAPP';
 import { APPProps } from '../../types/app.types';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,19 +16,19 @@ export const AnnualProcurementPlan: React.FC<APPProps> = ({ onNavigate }) => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     addNewItem,
     removeItem,
     updateItem,
     updateFormData,
     calculateGrandTotal,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
     successModal,
-    historyModal
+    approvedModal
   } = useAPP();
 
   return (
@@ -69,14 +69,14 @@ export const AnnualProcurementPlan: React.FC<APPProps> = ({ onNavigate }) => {
         onUpdateItem={updateItem}
         onRemoveItem={removeItem}
         onAddItem={addNewItem}
-        onSubmit={handleSaveDraft}
-        onSubmitForApproval={handleSubmitForApproval}
+        onUpdate={handleUpdate}
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
-        onViewHistory={historyModal.onViewHistory}
+        onViewApproved={approvedModal.onViewApproved}
         calculateGrandTotal={calculateGrandTotal}
         isGenerating={isGenerating}
+        isUpdating={isUpdating}
       />
       
       {showPreview && (
@@ -100,11 +100,12 @@ export const AnnualProcurementPlan: React.FC<APPProps> = ({ onNavigate }) => {
         message={successModal.message}
       />
       
-      <HistoryModal
-        isOpen={historyModal.isOpen}
-        onClose={historyModal.onClose}
-        items={historyModal.items}
-        onSelectItem={historyModal.onSelectItem}
+      <ApprovedFormsModal
+        isOpen={approvedModal.isOpen}
+        onClose={approvedModal.onClose}
+        items={approvedModal.items}
+        onSelectItem={approvedModal.onSelectItem}
+        formTypeLabel="Annual Procurement Plan"
       />
     </div>
   );

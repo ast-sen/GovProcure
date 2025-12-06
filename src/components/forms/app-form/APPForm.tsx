@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { APPFormHeader } from './APPFormHeader';
 import { APPItemsTable } from './APPItemsTable';
 import { APPFormFooter } from './APPFormFooter';
-import { FormActions } from '../shared/FormActions';
+import { ReportFormActions } from '../shared/ReportFormActions.tsx';
 import { APPItem, APPFormData, APPProps } from '../../../types/app.types';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -14,14 +14,14 @@ interface APPFormProps extends APPProps {
   onUpdateItem: (id: string, field: keyof APPItem, value: string) => void;
   onRemoveItem: (id: string) => void;
   onAddItem: () => void;
-  onSubmit: () => void;
-  onSubmitForApproval: () => void;
+  onUpdate: () => void; 
   onPrint: () => void;
   onPreview: () => void;
   onDownloadPDF: () => void;
-  onViewHistory: () => void;
+  onViewApproved: () => void;  
   calculateGrandTotal: () => string;
   isGenerating?: boolean;
+  isUpdating?: boolean;  // New loading state
 }
 
 export const APPForm: React.FC<APPFormProps> = ({
@@ -32,14 +32,14 @@ export const APPForm: React.FC<APPFormProps> = ({
   onUpdateItem,
   onRemoveItem,
   onAddItem,
-  onSubmit,
-  onSubmitForApproval,
+  onUpdate,
   onPrint,
   onPreview,
   onDownloadPDF,
-  onViewHistory,
+  onViewApproved,
   calculateGrandTotal,
-  isGenerating = false
+  isGenerating = false,
+  isUpdating = false
 }) => {
   const { styles } = useTheme();
 
@@ -64,15 +64,15 @@ export const APPForm: React.FC<APPFormProps> = ({
           </div>
         </div>
         
-        <FormActions
-          onSave={onSubmit}
-          onSubmit={onSubmitForApproval}
+        <ReportFormActions
+          onUpdate={onUpdate}
           onPrint={onPrint}
           onPreview={onPreview}
           onDownloadPDF={onDownloadPDF}
-          onViewHistory={onViewHistory}
-          saveLabel="Save APP"
+          onViewApproved={onViewApproved}
+          updateLabel="Update APP"
           isLoading={isGenerating}
+          isUpdating={isUpdating}
         />
       </div>
 

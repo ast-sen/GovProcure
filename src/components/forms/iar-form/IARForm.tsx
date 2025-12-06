@@ -4,7 +4,7 @@ import { IARFormHeader } from './IARFormHeader';
 import { IARItemsTable } from './IARTItemsTable';
 import { IARInspectionSection } from './IARInspectionSection';
 import { IARAcceptanceSection } from './IARAcceptanceSection';
-import { FormActions } from '../shared/FormActions';
+import { ReportFormActions } from '../shared/ReportFormActions.tsx';
 import { IARItem, IARFormData, IARProps } from '../../../types/iar.types';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -12,13 +12,13 @@ interface IARFormProps extends IARProps {
   formData: IARFormData;
   items: IARItem[];
   onUpdateFormData: (updates: Partial<IARFormData>) => void;
-  onSubmit: () => void;
-  onSubmitForApproval: () => void;
+  onUpdate: () => void;  // Changed from onSubmit
   onPrint: () => void;
   onPreview: () => void;
   onDownloadPDF: () => void;
-  onViewHistory: () => void;
+  onViewApproved: () => void;  // Changed from onViewHistory
   isGenerating?: boolean;
+  isUpdating?: boolean;  // New loading state
 }
 
 export const IARForm: React.FC<IARFormProps> = ({
@@ -26,13 +26,13 @@ export const IARForm: React.FC<IARFormProps> = ({
   items,
   onNavigate,
   onUpdateFormData,
-  onSubmit,
-  onSubmitForApproval,
+  onUpdate,
   onPrint,
   onPreview,
   onDownloadPDF,
-  onViewHistory,
-  isGenerating = false
+  onViewApproved,
+  isGenerating = false,
+  isUpdating = false
 }) => {
   const { styles, darkMode } = useTheme();
 
@@ -57,15 +57,15 @@ export const IARForm: React.FC<IARFormProps> = ({
           </div>
         </div>
         
-        <FormActions
-          onSave={onSubmit}
-          onSubmit={onSubmitForApproval}
+        <ReportFormActions
+          onUpdate={onUpdate}
           onPrint={onPrint}
           onPreview={onPreview}
           onDownloadPDF={onDownloadPDF}
-          onViewHistory={onViewHistory}
-          saveLabel="Save"
+          onViewApproved={onViewApproved}
+          updateLabel="Update"
           isLoading={isGenerating}
+          isUpdating={isUpdating}
         />
       </div>
 

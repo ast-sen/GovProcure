@@ -4,24 +4,7 @@ import { PPMPItem } from '../../../types/ppmp.types';
 import { MONTHS } from '../../../utils/constants/ppmp.constants';
 import { useSidebarWidth } from '../../layout/Layout';
 import { useTheme } from '../../../context/ThemeContext';
-
-const DEFAULT_CATEGORIES = [
-  'COMMON USED SUPPLIES',
-  'PLANT, PROPERTY & EQUIPMENTS',
-  'FUELS',
-  'LUBRICANTS',
-  'PLUMBING',
-  'ELECTRICAL',
-  'MEDICINE',
-  'FOODSTUFF',
-  'AGRICULTURAL SUPPLY',
-  'SPAREPARTS',
-  'COMPUTER & LAPTOP',
-  'JANITORIAL SERVICES',
-  'MEDICAL SUPPLY',
-  'PERSONAL HYGIENE',
-  'E-LOAD'
-];
+import { DEFAULT_CATEGORIES } from '../../../utils/constants/category.constant';
 
 interface PPMPFormTableProps {
   items: PPMPItem[];

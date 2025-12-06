@@ -10,10 +10,13 @@ const INITIAL_PR_ITEM: Omit<PRItem, 'id' | 'itemNo'> = {
   itemDescription: '',
   estimatedUnitCost: '',
   estimatedCost: '',
+  category: '', // Add category
 };
 
 export const usePurchaseRequest = () => {
   const [showPreview, setShowPreview] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  
   const { generatePDF, isGenerating } = useFormPDF({
     orientation: 'portrait',
     format: 'a4',
@@ -22,7 +25,6 @@ export const usePurchaseRequest = () => {
   
   const { isOpen, modalMessage, modalTitle, showSuccess, closeModal } = useSuccessModal();
 
-  // Save draft modal state
   const [saveDraftModalOpen, setSaveDraftModalOpen] = useState(false);
   const [saveDraftLoading, setSaveDraftLoading] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
@@ -42,7 +44,10 @@ export const usePurchaseRequest = () => {
     date: new Date().toISOString().split('T')[0],
     purpose: '',
     requestedBy: { name: '', designation: '', signature: '' },
-    approvedBy: { name: 'Municipal Mayor', designation: 'Head of Office/Department', signature: '' }
+    approvedBy: { name: 'Municipal Mayor', designation: 'Head of Office/Department', signature: '' },
+    officeAgency: '',
+    transactionNumber: '',
+    category: '' // Add category
   });
 
   const [items, setItems] = useState<PRItem[]>([
@@ -53,7 +58,8 @@ export const usePurchaseRequest = () => {
     const newItem: PRItem = {
       id: Date.now().toString(),
       itemNo: items.length + 1,
-      ...INITIAL_PR_ITEM
+      ...INITIAL_PR_ITEM,
+      category: formData.category // Use selected category
     };
     setItems([...items, newItem]);
   };
@@ -90,21 +96,42 @@ export const usePurchaseRequest = () => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
+  // Handle category selection
+  const handleSelectCategory = (category: string) => {
+    updateFormData({ category });
+    
+    // Update all existing items to the new category
+    setItems(items.map(item => ({
+      ...item,
+      category
+    })));
+    
+    setShowCategoryModal(false);
+    showSuccess(`Category changed to "${category}". All items will be under this category.`, 'Category Selected');
+  };
+
+  // Clear category
+  const handleClearCategory = () => {
+    updateFormData({ category: '' });
+    setItems(items.map(item => ({
+      ...item,
+      category: ''
+    })));
+    showSuccess('Category cleared. Items can now be from any category.', 'Category Cleared');
+  };
+
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
       return sum + (parseFloat(item.estimatedCost) || 0);
     }, 0).toFixed(2);
   };
 
-  // Internal save draft logic
   const saveDraft = (title: string) => {
     console.log('Saving PR as draft with title:', title);
     console.log('Form Data:', formData);
     console.log('Items:', items);
-    // Add your actual save logic here (API call, localStorage, etc.)
   };
 
-  // Handler for save draft modal
   const handleSaveDraftWithTitle = async (title: string) => {
     setSaveDraftLoading(true);
     try {
@@ -119,7 +146,6 @@ export const usePurchaseRequest = () => {
     }
   };
 
-  // Opens the save draft modal
   const handleSaveDraft = () => {
     setSaveDraftModalOpen(true);
   };
@@ -171,7 +197,9 @@ export const usePurchaseRequest = () => {
     isGenerating,
     draftTitle,
     saveDraftModal,
+    showCategoryModal,
     setShowPreview,
+    setShowCategoryModal,
     addNewItem,
     removeItem,
     updateItem,
@@ -183,6 +211,8 @@ export const usePurchaseRequest = () => {
     handlePrint,
     handlePreview,
     handleDownloadPDF,
+    handleSelectCategory,
+    handleClearCategory,
     
     successModal: {
       isOpen,

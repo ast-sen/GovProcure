@@ -6,6 +6,7 @@ export interface PRItem {
   itemDescription: string;
   estimatedUnitCost: string;
   estimatedCost: string;
+  category?: string;
 }
 
 export interface PRSignatory {
@@ -24,6 +25,7 @@ export interface PRFormData {
   approvedBy: PRSignatory;
   officeAgency: string;
   transactionNumber: string;
+  category?: string;
 }
 
 export interface PurchaseRequestProps {

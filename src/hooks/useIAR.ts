@@ -3,10 +3,13 @@ import { IARItem, IARFormData } from '../types/iar.types';
 import { SAMPLE_IAR_ITEMS } from '../utils/constants/iar.constants';
 import { useFormPDF } from './shared/useFormPDF';
 import { useSuccessModal } from './ui-hooks/useSuccessModal';
-import { useFormHistory } from './ui-hooks/useFormHistory';
+import { ApprovedFormItem } from '../components/ui/ApprovedFormsModal';
 
 export const useIAR = () => {
   const [showPreview, setShowPreview] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showApprovedModal, setShowApprovedModal] = useState(false);
+  
   const { generatePDF, isGenerating } = useFormPDF({
     orientation: 'landscape',
     format: 'legal',
@@ -14,14 +17,37 @@ export const useIAR = () => {
   });
   
   const { isOpen, modalMessage, modalTitle, showSuccess, closeModal } = useSuccessModal();
-  
-  const {
-    showHistoryModal,
-    historyItems,
-    handleViewHistory,
-    handleCloseHistory,
-    handleSelectItem
-  } = useFormHistory('inspection-acceptance');
+
+  // Mock approved forms data - Replace with API call
+  const [approvedForms] = useState<ApprovedFormItem[]>([
+    {
+      id: 'iar-1',
+      formNumber: 'IAR-2024-001',
+      title: 'Office Supplies Inspection',
+      dateApproved: '2024-11-15',
+      approvedBy: 'John Doe',
+      supplier: 'ABC Office Supplies Inc.',
+      department: 'Finance'
+    },
+    {
+      id: 'iar-2',
+      formNumber: 'IAR-2024-002',
+      title: 'IT Equipment Acceptance',
+      dateApproved: '2024-11-20',
+      approvedBy: 'Jane Smith',
+      supplier: 'Tech Solutions Corp.',
+      department: 'IT'
+    },
+    {
+      id: 'iar-3',
+      formNumber: 'IAR-2024-003',
+      title: 'Furniture Delivery Inspection',
+      dateApproved: '2024-11-25',
+      approvedBy: 'John Doe',
+      supplier: 'Modern Office Furniture',
+      department: 'Admin'
+    }
+  ]);
 
   const [formData, setFormData] = useState<IARFormData>({
     supplier: '',
@@ -42,19 +68,70 @@ export const useIAR = () => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  // ADD THESE TWO NEW FUNCTIONS
-  const handleSaveDraft = () => {
-    console.log('Saving IAR as draft...');
-    console.log('Form Data:', formData);
-    console.log('Items:', items);
-    showSuccess('Inspection & Acceptance Report has been saved as draft!', 'Draft Saved');
+  // Changed from handleSaveDraft to handleUpdate
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      console.log('Updating approved IAR...');
+      console.log('Form Data:', formData);
+      console.log('Items:', items);
+      
+      // TODO: Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // const response = await fetch('/api/iar/update', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ formData, items })
+      // });
+      
+      // if (!response.ok) throw new Error('Update failed');
+      
+      showSuccess('Inspection & Acceptance Report has been updated successfully!', 'IAR Updated');
+    } catch (error) {
+      console.error('Error updating IAR:', error);
+      showSuccess('Failed to update the IAR. Please try again.', 'Update Failed');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleSubmitForApproval = () => {
-    console.log('Submitting IAR for approval...');
-    console.log('Form Data:', formData);
-    console.log('Items:', items);
-    showSuccess('Inspection & Acceptance Report has been submitted for approval!', 'Submitted Successfully');
+  // Load an approved form when selected from the modal
+  const handleSelectApprovedForm = async (form: ApprovedFormItem) => {
+    try {
+      console.log('Loading approved form:', form);
+      
+      // TODO: Replace with actual API call to fetch full form data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // const response = await fetch(`/api/iar/approved/${form.id}`);
+      // if (!response.ok) throw new Error('Failed to load form');
+      // const fullData = await response.json();
+      
+      // Mock loading form data
+      setFormData({
+        supplier: form.supplier || '',
+        prNo: form.formNumber.replace('IAR-', 'PR-'),
+        prDate: form.dateApproved,
+        poNo: form.formNumber.replace('IAR-', 'PO-'),
+        dateReceived: form.dateApproved,
+        dateInspected: form.dateApproved,
+        inspectionOfficer: form.approvedBy,
+        acceptanceComplete: true,
+        acceptancePartial: false,
+        propertyOfficer: form.approvedBy
+      });
+      
+      // You would also load the items from the API
+      // setItems(fullData.items);
+      
+      setShowApprovedModal(false);
+      
+      showSuccess(`Successfully loaded ${form.formNumber}`, 'Form Loaded');
+    } catch (error) {
+      console.error('Error loading approved form:', error);
+      showSuccess('Failed to load the approved form. Please try again.', 'Load Failed');
+    }
   };
 
   const handlePrint = () => {
@@ -81,10 +158,10 @@ export const useIAR = () => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,           
-    handleSubmitForApproval,   
+    handleUpdate,           // Changed from handleSaveDraft
     handlePrint,
     handlePreview,
     handleDownloadPDF,
@@ -96,12 +173,12 @@ export const useIAR = () => {
       onClose: closeModal
     },
     
-    historyModal: {
-      isOpen: showHistoryModal,
-      items: historyItems,
-      onClose: handleCloseHistory,
-      onSelectItem: handleSelectItem,
-      onViewHistory: handleViewHistory
+    approvedModal: {
+      isOpen: showApprovedModal,
+      onClose: () => setShowApprovedModal(false),
+      onViewApproved: () => setShowApprovedModal(true),
+      items: approvedForms,
+      onSelectItem: handleSelectApprovedForm
     }
   };
 };

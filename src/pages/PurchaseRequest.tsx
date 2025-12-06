@@ -4,6 +4,7 @@ import { PRPreviewModal } from '../components/templates/purchase-request-temp/PR
 import { PRPrintTemplate } from '../components/templates/purchase-request-temp/PRPrintTemplate';
 import { SuccessModal } from '../components/ui/SuccessModal';
 import { HistoryModal } from '../components/ui/HistoryModal';
+import { CategorySelectionModal } from '../components/ui/modals/CategorySelctionModal';
 import { usePurchaseRequest } from '../hooks/usePurchaseRequest';
 import { PurchaseRequestProps } from '../types/purchase-request.types';
 import { useTheme } from '../context/ThemeContext';
@@ -17,7 +18,9 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
     items,
     showPreview,
     isGenerating,
+    showCategoryModal,
     setShowPreview,
+    setShowCategoryModal,
     addNewItem,
     removeItem,
     updateItem,
@@ -28,6 +31,8 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
     handlePrint,
     handlePreview,
     handleDownloadPDF,
+    handleSelectCategory,
+    handleClearCategory,
     successModal,
     historyModal,
     saveDraftModal 
@@ -48,7 +53,9 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
-        onViewHistory={historyModal.onViewHistory}  
+        onViewHistory={historyModal.onViewHistory}
+        onOpenCategoryModal={() => setShowCategoryModal(true)}
+        onClearCategory={handleClearCategory}
         calculateTotal={calculateTotal}
         isGenerating={isGenerating}
       />
@@ -83,6 +90,7 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
         items={historyModal.items}
         onSelectItem={historyModal.onSelectItem}
       />
+      
       <SaveDraftModal
         isOpen={saveDraftModal.isOpen}
         onClose={saveDraftModal.close}
@@ -91,6 +99,13 @@ export const PurchaseRequest: React.FC<PurchaseRequestProps> = ({ onNavigate }) 
         docType="PR"
         office={formData.officeAgency}
         transactionNumber={formData.transactionNumber}
+      />
+      
+      <CategorySelectionModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSelectCategory={handleSelectCategory}
+        currentCategory={formData.category}
       />
     </div>
   );

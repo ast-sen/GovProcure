@@ -3,7 +3,7 @@ import { IARForm } from '../../components/forms/iar-form/IARForm';
 import { IARPreviewModal } from '../../components/templates/iar-temp/IARPreviewModal';
 import { IARPrintTemplate } from '../../components/templates/iar-temp/IARPrintTemplate';
 import { SuccessModal } from '../../components/ui/SuccessModal';
-import { HistoryModal } from '../../components/ui/HistoryModal';
+import { ApprovedFormsModal } from '../../components/ui/ApprovedFormsModal';
 import { useIAR } from '../../hooks/useIAR';
 import { IARProps } from '../../types/iar.types';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,15 +16,15 @@ export const AcceptanceForm: React.FC<IARProps> = ({ onNavigate }) => {
     items,
     showPreview,
     isGenerating,
+    isUpdating,
     setShowPreview,
     updateFormData,
-    handleSaveDraft,
-    handleSubmitForApproval,
+    handleUpdate,
     handlePrint,
     handlePreview,
     handleDownloadPDF,
     successModal,
-    historyModal
+    approvedModal
   } = useIAR();
 
   return (
@@ -34,13 +34,13 @@ export const AcceptanceForm: React.FC<IARProps> = ({ onNavigate }) => {
         items={items}
         onNavigate={onNavigate}
         onUpdateFormData={updateFormData}
-        onSubmit={handleSaveDraft}
-        onSubmitForApproval={handleSubmitForApproval}
+        onUpdate={handleUpdate}
         onPrint={handlePrint}
         onPreview={handlePreview}
         onDownloadPDF={handleDownloadPDF}
-        onViewHistory={historyModal.onViewHistory}
+        onViewApproved={approvedModal.onViewApproved}
         isGenerating={isGenerating}
+        isUpdating={isUpdating}
       />
       
       {showPreview && (
@@ -65,11 +65,12 @@ export const AcceptanceForm: React.FC<IARProps> = ({ onNavigate }) => {
         message={successModal.message}
       />
       
-      <HistoryModal
-        isOpen={historyModal.isOpen}
-        onClose={historyModal.onClose}
-        items={historyModal.items}
-        onSelectItem={historyModal.onSelectItem}
+      <ApprovedFormsModal
+        isOpen={approvedModal.isOpen}
+        onClose={approvedModal.onClose}
+        items={approvedModal.items}
+        onSelectItem={approvedModal.onSelectItem}
+        formTypeLabel="Inspection & Acceptance Report"
       />
     </div>
   );
